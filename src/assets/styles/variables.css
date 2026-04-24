@@ -1,0 +1,108 @@
+/* ============================================
+   パチスロ収支管理アプリ - CSS変数定義
+   Premium Dark テーマ
+   ============================================ */
+
+:root {
+  /* ── Background Colors ── */
+  --bg-primary: #0a0a14;
+  --bg-secondary: #0f0f1a;
+  --bg-tertiary: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-card-hover: #1c2a4a;
+  --bg-input: #0d1b2a;
+  --bg-modal: rgba(0, 0, 0, 0.7);
+
+  /* ── Surface & Glass Effect ── */
+  --glass-bg: rgba(22, 33, 62, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* ── Text Colors ── */
+  --text-primary: #e8e8f0;
+  --text-secondary: #8b8fa3;
+  --text-muted: #5a5e72;
+  --text-inverse: #0a0a14;
+
+  /* ── Accent Colors ── */
+  --accent-primary: #00d4ff;
+  --accent-primary-rgb: 0, 212, 255;
+  --accent-secondary: #7c3aed;
+  --accent-secondary-rgb: 124, 58, 237;
+  --accent-gradient: linear-gradient(135deg, #00d4ff, #7c3aed);
+
+  /* ── Status Colors ── */
+  --color-win: #22c55e;
+  --color-win-bg: rgba(34, 197, 94, 0.1);
+  --color-win-border: rgba(34, 197, 94, 0.3);
+  --color-lose: #ef4444;
+  --color-lose-bg: rgba(239, 68, 68, 0.1);
+  --color-lose-border: rgba(239, 68, 68, 0.3);
+  --color-even: #f59e0b;
+  --color-even-bg: rgba(245, 158, 11, 0.1);
+
+  /* ── Chart Colors ── */
+  --chart-1: #00d4ff;
+  --chart-2: #7c3aed;
+  --chart-3: #22c55e;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --chart-6: #ec4899;
+  --chart-7: #06b6d4;
+  --chart-8: #8b5cf6;
+
+  /* ── Border ── */
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color-hover: rgba(255, 255, 255, 0.12);
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 24px;
+
+  /* ── Spacing ── */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* ── Typography ── */
+  --font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.15);
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* ── Layout ── */
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 64px;
+  --content-max-width: 1200px;
+
+  /* ── Z-Index ── */
+  --z-sidebar: 100;
+  --z-header: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}

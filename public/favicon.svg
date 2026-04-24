@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#144ba6" />
+      <stop offset="100%" stop-color="#19a16f" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <rect width="512" height="512" rx="116" fill="url(#bg)" />
+  
+  <g filter="url(#shadow)">
+    <!-- Text -->
+    <text x="256" y="140" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="82" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">ResultLog</text>
+    
+    <!-- Chart Axis -->
+    <path d="M 80,200 L 80,430 L 310,430" fill="none" stroke="#ffffff" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- Bars -->
+    <rect x="120" y="350" width="40" height="80" fill="#ffffff" rx="4"/>
+    <rect x="180" y="290" width="40" height="140" fill="#ffffff" rx="4"/>
+    <rect x="240" y="210" width="40" height="220" fill="#ffffff" rx="4"/>
+    
+    <!-- Line Chart Line -->
+    <path d="M 110,330 L 160,270 L 200,310 L 275,210" fill="none" stroke="#ffffff" stroke-width="24" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- Arrow Head -->
+    <polygon points="295,180 240,200 275,245" fill="#ffffff" stroke="#ffffff" stroke-width="8" stroke-linejoin="round"/>
+    
+    <!-- Checkmark -->
+    <path d="M 335,315 L 385,365 L 470,245" fill="none" stroke="#ffffff" stroke-width="36" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>
