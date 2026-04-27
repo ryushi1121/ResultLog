@@ -35,13 +35,13 @@ const routes = [
     path: '/analytics',
     name: 'Analytics',
     component: () => import('../views/AnalyticsView.vue'),
-    meta: { requiresAuth: true, title: '集計・分析', icon: 'fa-solid fa-chart-line' }
+    meta: { requiresAuth: true, title: '集計', icon: 'fa-solid fa-table-list' }
   },
   {
     path: '/charts',
     name: 'Charts',
     component: () => import('../views/ChartsView.vue'),
-    meta: { requiresAuth: true, title: 'グラフ', icon: 'fa-solid fa-chart-area' }
+    meta: { requiresAuth: true, title: '分析', icon: 'fa-solid fa-chart-area' }
   },
   {
     path: '/settings',

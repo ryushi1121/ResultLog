@@ -1,9 +1,8 @@
 <template>
-  <div class="chart-container card mb-4">
-    <h3>{{ trendChartData ? trendChartData.title : '収支推移' }}</h3>
+  <div v-if="trendChartData" class="analytics-card card mb-4">
+    <h3>{{ trendChartData.title }}</h3>
     <div class="chart-wrapper">
-      <Bar v-if="trendChartData" :data="chartData" :options="chartOptions" />
-      <div v-else class="empty-state text-muted text-center py-4">データがありません</div>
+      <Bar :data="chartData" :options="chartOptions" />
     </div>
   </div>
 </template>
@@ -111,8 +110,12 @@ const chartOptions = computed(() => ({
 
 <style scoped>
 .chart-wrapper {
-  height: 300px;
   position: relative;
-  margin-top: 10px;
+  height: 280px;
+}
+@media (max-width: 600px) {
+  .chart-wrapper {
+    height: 220px;
+  }
 }
 </style>
