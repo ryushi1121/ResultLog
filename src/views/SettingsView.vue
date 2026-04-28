@@ -98,6 +98,13 @@
         <p v-if="syncMessage" class="sync-message mt-2 text-sm text-success">
           {{ syncMessage }}
         </p>
+        <div class="import-link-row mt-4">
+          <router-link to="/import" class="btn btn-secondary import-link">
+            <i class="fa-solid fa-file-import"></i>
+            CSV取込
+          </router-link>
+          <p class="text-muted text-sm mt-2">CSVファイルから収支データを一括登録します</p>
+        </div>
       </div>
 
       <!-- アプリ情報 -->

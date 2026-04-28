@@ -65,7 +65,9 @@ export const useStoreSettings = () => {
   const calculateYen = (storeName, medals) => {
     if (!medals) return 0;
     const rate = getExchangeRate(storeName);
-    return Math.round(medals * (100 / rate));
+    // 1枚単価を小数第2位で四捨五入（例: 5.1枚交換 → 100/5.1=19.607...→19.6円）
+    const yenPerMedal = Math.round(100 / rate * 10) / 10;
+    return Math.round(medals * yenPerMedal);
   };
 
   return {

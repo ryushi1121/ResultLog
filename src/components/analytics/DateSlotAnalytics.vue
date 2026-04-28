@@ -102,7 +102,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#aaa',
         font: { size: 11 },
-        callback: v => `${v.toLocaleString()}円`
+        callback: v => `${v / 1000}k`
       },
       grid: { color: 'rgba(255,255,255,0.05)' }
     }
@@ -120,7 +120,9 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
 <style scoped>
 .chart-wrapper {
   position: relative;
+  width: 100%;
   height: 240px;
+  overflow: hidden;
   margin-bottom: 20px;
 }
 .match-section {

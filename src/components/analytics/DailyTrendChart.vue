@@ -1,28 +1,31 @@
 <template>
-  <div v-if="trendChartData" class="analytics-card card mb-4">
-    <h3>{{ trendChartData.title }}</h3>
+  <div class="analytics-card card mb-4">
+    <h3>{{ trendChartData ? trendChartData.title : '収支推移' }}</h3>
     <div class="chart-wrapper">
-      <Bar :data="chartData" :options="chartOptions" />
+      <VueChart v-if="trendChartData" type="bar" :data="chartData" :options="chartOptions" />
+      <div v-else class="empty-state text-muted text-center py-4">データがありません</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import { Bar } from 'vue-chartjs';
+import { Chart as VueChart } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   LineElement,
+  LineController,
   PointElement,
   Tooltip,
   Legend
 } from 'chart.js';
 import { useAnalytics } from '@/composables/useAnalytics';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, LineElement, LineController, PointElement, Tooltip, Legend);
 
 const { trendChartData } = useAnalytics();
 
@@ -90,7 +93,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#aaa',
         font: { size: 11 },
-        callback: v => `${v.toLocaleString()}円`
+        callback: v => `${v / 1000}k`
       },
       grid: { color: 'rgba(255,255,255,0.05)' }
     },
@@ -100,7 +103,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#00d4ff',
         font: { size: 11 },
-        callback: v => `${v.toLocaleString()}円`
+        callback: v => `${v / 1000}k`
       },
       grid: { drawOnChartArea: false }
     }
@@ -111,7 +114,9 @@ const chartOptions = computed(() => ({
 <style scoped>
 .chart-wrapper {
   position: relative;
+  width: 100%;
   height: 280px;
+  overflow: hidden;
 }
 @media (max-width: 600px) {
   .chart-wrapper {

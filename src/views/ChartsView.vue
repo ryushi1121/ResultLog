@@ -19,6 +19,7 @@
     <div class="charts-grid">
       <TrendChart />
       <DateSlotAnalytics />
+      <SpecialDateAnalytics />
       <StoreChart v-if="selectedStore === ''" />
       <MachineChart />
       <WeekdayChart />
@@ -37,6 +38,7 @@ import StoreChart from '@/components/charts/StoreChart.vue';
 import MachineChart from '@/components/charts/MachineChart.vue';
 import WeekdayChart from '@/components/charts/WeekdayChart.vue';
 import DateSlotAnalytics from '@/components/analytics/DateSlotAnalytics.vue';
+import SpecialDateAnalytics from '@/components/analytics/SpecialDateAnalytics.vue';
 
 const { isLoaded, loadEntries } = useEntries();
 const { selectedMachine, selectedStore, summaryStats, periodType, periodValue } = useAnalytics();

@@ -119,6 +119,65 @@ export const useAnalytics = () => {
     }));
   });
 
+  // 日付ゾロ目日（11日・22日）
+  const dayZoromeStats = computed(() => {
+    const targets = ['11', '22'];
+    const groups = {};
+    targets.forEach(d => { groups[d] = { day: d, count: 0, winCount: 0, profit: 0 }; });
+    drilldownEntries.value.forEach(e => {
+      if (!e.date) return;
+      const day = e.date.slice(-2);
+      if (groups[day]) {
+        groups[day].count++;
+        groups[day].profit += e.profit || 0;
+        if (e.profit > 0) groups[day].winCount++;
+      }
+    });
+    return targets.map(d => ({
+      ...groups[d],
+      winRate: groups[d].count > 0 ? (groups[d].winCount / groups[d].count) * 100 : 0,
+      avgProfit: groups[d].count > 0 ? groups[d].profit / groups[d].count : 0
+    }));
+  });
+
+  // 月日ゾロ目（12/12除く）: 月==日 + 全桁同一（1/11,2/22）
+  const MONTH_DAY_ZOROME = [
+    { key: '01-01', label: '1/1' },
+    { key: '01-11', label: '1/11' },
+    { key: '02-02', label: '2/2' },
+    { key: '02-22', label: '2/22' },
+    { key: '03-03', label: '3/3' },
+    { key: '04-04', label: '4/4' },
+    { key: '05-05', label: '5/5' },
+    { key: '06-06', label: '6/6' },
+    { key: '07-07', label: '7/7' },
+    { key: '08-08', label: '8/8' },
+    { key: '09-09', label: '9/9' },
+    { key: '10-10', label: '10/10' },
+    { key: '11-11', label: '11/11' },
+  ];
+
+  const monthDayZoromeStats = computed(() => {
+    const groups = {};
+    MONTH_DAY_ZOROME.forEach(({ key, label }) => {
+      groups[key] = { key, label, count: 0, winCount: 0, profit: 0 };
+    });
+    drilldownEntries.value.forEach(e => {
+      if (!e.date) return;
+      const md = e.date.substring(5); // MM-DD
+      if (groups[md]) {
+        groups[md].count++;
+        groups[md].profit += e.profit || 0;
+        if (e.profit > 0) groups[md].winCount++;
+      }
+    });
+    return MONTH_DAY_ZOROME.map(({ key }) => ({
+      ...groups[key],
+      winRate: groups[key].count > 0 ? (groups[key].winCount / groups[key].count) * 100 : 0,
+      avgProfit: groups[key].count > 0 ? groups[key].profit / groups[key].count : 0
+    }));
+  });
+
   // 日付末尾と台番号末尾の一致・不一致の比較（drilldownEntries ベース）
   const slotMatchStats = computed(() => {
     const match =   { label: '一致', count: 0, winCount: 0, profit: 0 };
@@ -247,6 +306,8 @@ export const useAnalytics = () => {
     trendChartData,
     dateSuffixStats,
     slotMatchStats,
+    dayZoromeStats,
+    monthDayZoromeStats,
     setSelectedStore,
     setSelectedMachine
   };

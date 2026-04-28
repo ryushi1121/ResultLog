@@ -1,8 +1,13 @@
 <template>
   <div class="list-view">
     <div class="page-header">
-      <h1 class="page-title">収支一覧</h1>
-      <p class="page-subtitle">記録した収支の詳細を確認・管理できます</p>
+      <div>
+        <h1 class="page-title">収支一覧</h1>
+        <p class="page-subtitle">記録した収支の詳細を確認・管理できます</p>
+      </div>
+      <button class="btn btn-export" @click="handleExport" :disabled="filteredEntries.length === 0">
+        <i class="fa-solid fa-file-csv"></i> CSV出力
+      </button>
     </div>
 
     <FilterPanel 
@@ -22,9 +27,10 @@
     </div>
 
     <div v-else class="list-content">
-      <EntryTable 
+      <EntryTable
         :entries="filteredEntries"
         @delete-entry="handleDelete"
+        @bulk-delete="handleBulkDelete"
       />
     </div>
   </div>
@@ -35,47 +41,39 @@ import { ref, computed, onMounted } from 'vue';
 import { useEntries } from '../composables/useEntries';
 import FilterPanel from '../components/list/FilterPanel.vue';
 import EntryTable from '../components/list/EntryTable.vue';
+import { exportCSV } from '../utils/csvExporter';
 
-const { entries, isLoading, error, loadEntries, removeEntry, suggestStores, suggestMachines, isLoaded } = useEntries();
+const { entries, isLoading, error, loadEntries, removeEntry, removeBulk, suggestStores, suggestMachines, isLoaded } = useEntries();
 const currentFilters = ref(null);
 
 const filteredEntries = computed(() => {
   if (!currentFilters.value) return entries.value;
-  
+
   let result = entries.value;
-  
-  // Month filter
-  if (currentFilters.value.month) {
-    result = result.filter(e => e.date.startsWith(currentFilters.value.month));
+  const { periodType, periodValue, store, machine } = currentFilters.value;
+
+  if (periodType === 'month' && periodValue) {
+    result = result.filter(e => e.date.startsWith(periodValue));
+  } else if (periodType === 'year' && periodValue) {
+    result = result.filter(e => e.date.startsWith(periodValue));
   }
-  
-  // Store filter
-  if (currentFilters.value.store) {
-    result = result.filter(e => e.store === currentFilters.value.store);
-  }
-  
-  // Machine filter
-  if (currentFilters.value.machine) {
-    result = result.filter(e => e.machine === currentFilters.value.machine);
-  }
-  
+
+  if (store) result = result.filter(e => e.store === store);
+  if (machine) result = result.filter(e => e.machine === machine);
+
   return result;
 });
 
 const handleFilterChange = (filters) => {
   currentFilters.value = filters;
-  
-  // If month changed, we might need to load data from API
-  // In a real app we might paginate or load per month.
-  // For now, if we don't have the data, we fetch it.
-  if (filters.month) {
-    const minDate = new Date(filters.month + '-01');
-    
-    // Check if we need to load (if we have no entries matching this month, it might not be loaded)
-    // Here we just make sure data is loaded if we switch months dynamically, 
-    // but in useEntries we might just keep fetching and appending. 
-    // To simplify: if we already fetched all recently, we rely on local filtering.
-  }
+};
+
+const handleExport = () => {
+  const f = currentFilters.value;
+  let filename = 'resultlog';
+  if (f?.periodType === 'month' && f.periodValue) filename += `_${f.periodValue}`;
+  else if (f?.periodType === 'year' && f.periodValue) filename += `_${f.periodValue}`;
+  exportCSV(filteredEntries.value, `${filename}.csv`);
 };
 
 const handleDelete = async (id) => {
@@ -83,6 +81,14 @@ const handleDelete = async (id) => {
     await removeEntry(id);
   } catch (err) {
     alert('削除に失敗しました: ' + err.message);
+  }
+};
+
+const handleBulkDelete = async (ids) => {
+  try {
+    await removeBulk(ids);
+  } catch (err) {
+    alert(err.message);
   }
 };
 
@@ -104,7 +110,35 @@ onMounted(() => {
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 2rem;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-export:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.btn-export:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .page-title {

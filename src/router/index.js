@@ -26,6 +26,12 @@ const routes = [
     meta: { requiresAuth: true, title: '収支編集', icon: 'fa-solid fa-pen-to-square' }
   },
   {
+    path: '/import',
+    name: 'Import',
+    component: () => import('../views/ImportView.vue'),
+    meta: { requiresAuth: true, title: 'CSV取込', icon: 'fa-solid fa-file-import' }
+  },
+  {
     path: '/list',
     name: 'List',
     component: () => import('../views/ListView.vue'),

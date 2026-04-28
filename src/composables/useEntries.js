@@ -83,6 +83,31 @@ export const useEntries = () => {
     }
   };
 
+  const removeBulk = async (ids) => {
+    isLoading.value = true;
+    error.value = null;
+    const succeeded = [];
+    let failed = 0;
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        try {
+          await deleteApi(ids[i]);
+          succeeded.push(ids[i]);
+        } catch {
+          failed++;
+        }
+        if (i < ids.length - 1) await new Promise(r => setTimeout(r, 200));
+      }
+      entries.value = entries.value.filter(e => !succeeded.includes(e.id));
+      if (failed > 0) throw new Error(`${failed}件の削除に失敗しました`);
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   // Get unique stores for autocomplete
   const suggestStores = computed(() => {
     const stores = new Set();
@@ -111,6 +136,7 @@ export const useEntries = () => {
     addEntry,
     editEntry,
     removeEntry,
+    removeBulk,
     suggestStores,
     suggestMachines
   };

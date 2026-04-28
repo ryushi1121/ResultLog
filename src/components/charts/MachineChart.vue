@@ -67,8 +67,10 @@ const chartOptions = {
 
 <style scoped>
 .chart-wrapper {
-  height: 300px;
   position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
   margin-top: 10px;
 }
 </style>

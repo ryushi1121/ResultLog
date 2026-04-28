@@ -57,7 +57,7 @@ const chartOptions = {
   scales: {
     y: {
       grid: { color: 'rgba(255,255,255,0.05)' },
-      ticks: { color: '#8892b0' }
+      ticks: { color: '#8892b0', callback: v => `${v / 1000}k` }
     },
     x: {
       grid: { display: false },
@@ -69,8 +69,10 @@ const chartOptions = {
 
 <style scoped>
 .chart-wrapper {
-  height: 300px;
   position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
   margin-top: 10px;
 }
 </style>

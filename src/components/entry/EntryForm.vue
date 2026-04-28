@@ -48,7 +48,6 @@
             type="time"
             v-model="formData.startTime"
             class="form-control"
-            required
           />
         </div>
 
@@ -59,7 +58,6 @@
             type="time"
             v-model="formData.endTime"
             class="form-control"
-            required
           />
         </div>
       </div>
@@ -161,7 +159,16 @@
       <div class="form-actions">
         <button type="submit" class="btn btn-primary btn-submit" :disabled="isLoading">
           <span v-if="isLoading">保存中...</span>
-          <span v-else>登録する</span>
+          <span v-else>{{ isEditMode ? '更新する' : '登録する' }}</span>
+        </button>
+        <button
+          v-if="isEditMode"
+          type="button"
+          class="btn btn-delete"
+          :disabled="isLoading"
+          @click="handleDelete"
+        >
+          <i class="fa-solid fa-trash"></i> この記録を削除する
         </button>
       </div>
     </form>
@@ -185,7 +192,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const { entries, addEntry, editEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
+const { entries, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
 const { calculateYen } = useStoreSettings();
 
 // Initialize form data
@@ -239,6 +246,18 @@ onMounted(() => {
     }
   }
 });
+
+const handleDelete = async () => {
+  const entry = entries.value.find(e => e.id === props.entryId);
+  const label = entry ? `${entry.date}の「${entry.store}」` : 'この記録';
+  if (!window.confirm(`${label}を削除しますか？\n（この操作は元に戻せません）`)) return;
+  try {
+    await removeEntry(props.entryId);
+    router.push({ name: 'List' });
+  } catch (err) {
+    alert('削除に失敗しました: ' + err.message);
+  }
+};
 
 const submitForm = async () => {
   try {
@@ -404,6 +423,9 @@ textarea.form-control {
 
 .form-actions {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .btn {
@@ -435,5 +457,17 @@ textarea.form-control {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-size: 0.9rem;
+  padding: 0.65rem 1.5rem;
+}
+.btn-delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
 }
 </style>
