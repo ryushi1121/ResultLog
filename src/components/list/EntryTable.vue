@@ -20,8 +20,8 @@
               日付／店舗 <span class="sort-icon">{{ sortAsc ? '▲' : '▼' }}</span>
             </th>
             <th class="col-machine">機種</th>
-            <th class="col-inv-col num-col">投資／回収</th>
             <th class="col-profit num-col">収支</th>
+            <th class="col-inv-col num-col">投資／回収</th>
             <th class="col-actions"></th>
           </tr>
         </thead>
@@ -44,14 +44,14 @@
                 </span>
               </div>
             </td>
+            <td class="col-profit num-col" :class="getProfitClass(entry.profit)">
+              {{ formatProfit(entry.profit) }}
+            </td>
             <td class="col-inv-col num-col">
               <div class="two-line-cell two-line-cell--right">
                 <span class="line-main">{{ formatCurrency(entry.investment) }}</span>
                 <span class="line-sub">{{ formatCurrency(entry.collection) }}</span>
               </div>
-            </td>
-            <td class="col-profit num-col" :class="getProfitClass(entry.profit)">
-              {{ formatProfit(entry.profit) }}
             </td>
             <td class="col-actions">
               <div class="action-btns">
@@ -69,13 +69,13 @@
           <tr class="summary-row">
             <td></td>
             <td colspan="2" class="text-right">合計</td>
+            <td class="num-col" :class="getProfitClass(totalProfit)">{{ formatProfit(totalProfit) }}</td>
             <td class="num-col">
               <div class="two-line-cell two-line-cell--right">
                 <span class="line-main">{{ formatCurrency(totalInvestment) }}</span>
                 <span class="line-sub">{{ formatCurrency(totalCollection) }}</span>
               </div>
             </td>
-            <td class="num-col" :class="getProfitClass(totalProfit)">{{ formatProfit(totalProfit) }}</td>
             <td></td>
           </tr>
         </tfoot>

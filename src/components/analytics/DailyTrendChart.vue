@@ -24,6 +24,7 @@ import {
   Legend
 } from 'chart.js';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { computeSyncedBounds } from '@/utils/chartUtils';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, LineElement, LineController, PointElement, Tooltip, Legend);
 
@@ -64,51 +65,74 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  interaction: { mode: 'index', intersect: false },
-  plugins: {
-    legend: {
-      labels: { color: '#ccc', font: { size: 12 } }
-    },
-    tooltip: {
-      callbacks: {
-        label: (ctx) => {
-          const val = ctx.parsed.y;
-          if (val === null) return null;
-          return `${ctx.dataset.label}: ${val >= 0 ? '+' : ''}${val.toLocaleString()}円`;
+const chartOptions = computed(() => {
+  try {
+    const data = trendChartData.value;
+    const bounds = data ? computeSyncedBounds(data.profits, data.cumulative) : null;
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: '#ccc', font: { size: 12 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const val = ctx.parsed.y;
+              if (val === null) return null;
+              return `${ctx.dataset.label}: ${val >= 0 ? '+' : ''}${val.toLocaleString()}円`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#aaa', font: { size: 11 } },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        yLeft: {
+          type: 'linear',
+          position: 'left',
+          min: bounds?.left?.min,
+          max: bounds?.left?.max,
+          ticks: {
+            color: '#aaa',
+            font: { size: 11 },
+            callback: v => `${Math.round(v / 1000)}k`
+          },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        yRight: {
+          type: 'linear',
+          position: 'right',
+          min: bounds?.right?.min,
+          max: bounds?.right?.max,
+          ticks: {
+            color: '#00d4ff',
+            font: { size: 11 },
+            callback: v => `${Math.round(v / 1000)}k`
+          },
+          grid: { drawOnChartArea: false }
         }
       }
-    }
-  },
-  scales: {
-    x: {
-      ticks: { color: '#aaa', font: { size: 11 } },
-      grid: { color: 'rgba(255,255,255,0.05)' }
-    },
-    yLeft: {
-      type: 'linear',
-      position: 'left',
-      ticks: {
-        color: '#aaa',
-        font: { size: 11 },
-        callback: v => `${v / 1000}k`
-      },
-      grid: { color: 'rgba(255,255,255,0.05)' }
-    },
-    yRight: {
-      type: 'linear',
-      position: 'right',
-      ticks: {
-        color: '#00d4ff',
-        font: { size: 11 },
-        callback: v => `${v / 1000}k`
-      },
-      grid: { drawOnChartArea: false }
-    }
+    };
+  } catch (e) {
+    console.error('Chart options error:', e);
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#ccc', font: { size: 12 } } } },
+      scales: {
+        x: { ticks: { color: '#aaa' } },
+        yLeft: { type: 'linear', position: 'left', ticks: { color: '#aaa' } },
+        yRight: { type: 'linear', position: 'right', ticks: { color: '#00d4ff' } }
+      }
+    };
   }
-}));
+});
 </script>
 
 <style scoped>

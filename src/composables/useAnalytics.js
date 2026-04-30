@@ -85,11 +85,31 @@ export const useAnalytics = () => {
     return Array.from(stores).sort();
   });
 
-  // Store stats（StoreChart 用・全店舗比較なのでストア選択は非適用）
-  const storeStats = computed(() => _groupAndAggregate(e => e.store, filteredEntries.value));
+  // 期間・店舗内の機種一覧（ドロップダウン用）
+  const availableMachines = computed(() => {
+    let base = filteredEntries.value;
+    if (selectedStore.value !== '') base = base.filter(e => e.store === selectedStore.value);
+    const machines = new Set();
+    base.forEach(e => { if (e.machine) machines.add(e.machine); });
+    return Array.from(machines).sort();
+  });
+
+  // Store stats（StoreChart 用・全店舗比較なのでストア選択は非適用、機種選択は適用）
+  const storeStats = computed(() => {
+    let base = filteredEntries.value;
+    if (selectedMachine.value) base = base.filter(e => e.machine === selectedMachine.value);
+    return _groupAndAggregate(e => e.store, base);
+  });
 
   // 機種集計は drilldownEntries ベース（選択店舗でフィルタ済み）
   const machineStats = computed(() => _groupAndAggregate(e => e.machine, drilldownEntries.value));
+
+  // 円グラフ用：機種フィルターを除外（期間・店舗のみ適用）
+  const machineStatsAll = computed(() => {
+    let base = filteredEntries.value;
+    if (selectedStore.value !== '') base = base.filter(e => e.store === selectedStore.value);
+    return _groupAndAggregate(e => e.machine, base);
+  });
 
   const weekdayStats = computed(() => {
     const stats = _groupAndAggregate(e => e.dayOfWeek, drilldownEntries.value);
@@ -198,6 +218,35 @@ export const useAnalytics = () => {
     }));
   });
 
+  const machineTrendData = computed(() => {
+    if (!selectedMachine.value) return null;
+
+    const sorted = [...drilldownEntries.value]
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+    if (sorted.length === 0) return null;
+
+    let cum = 0;
+    return sorted.map((e, i) => {
+      cum += e.profit || 0;
+      return { ...e, sessionNo: i + 1, cumulativeProfit: cum };
+    });
+  });
+
+  const machineTrendStats = computed(() => {
+    const entries = machineTrendData.value;
+    if (!entries || entries.length === 0) return null;
+    const count = entries.length;
+    const winCount = entries.filter(e => e.profit > 0).length;
+    const totalInv = entries.reduce((sum, e) => sum + (e.investment || 0), 0);
+    const totalCol = entries.reduce((sum, e) => sum + (e.collection || 0), 0);
+    return {
+      winRate: (winCount / count) * 100,
+      avgInvestment: Math.round(totalInv / count),
+      avgCollection: Math.round(totalCol / count),
+    };
+  });
+
   const monthlyStats = computed(() => {
     const stats = _groupAndAggregate(e => e.date ? e.date.substring(0, 7) : '', drilldownEntries.value);
     return stats.filter(s => s.name).sort((a, b) => a.name.localeCompare(b.name));
@@ -298,10 +347,14 @@ export const useAnalytics = () => {
     filteredEntries,
     drilldownEntries,
     availableStores,
+    availableMachines,
     summaryStats,
     storeStats,
     machineStats,
+    machineStatsAll,
     weekdayStats,
+    machineTrendData,
+    machineTrendStats,
     monthlyStats,
     trendChartData,
     dateSuffixStats,

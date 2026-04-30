@@ -49,9 +49,11 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Annotation);
 
 const { dateSuffixStats, slotMatchStats } = useAnalytics();
 
@@ -91,7 +93,8 @@ const chartOptions = computed(() => ({
           return s ? [`回数: ${s.count}回`] : [];
         }
       }
-    }
+    },
+    ...zeroLineAnnotationSingle
   },
   scales: {
     x: {
@@ -102,7 +105,7 @@ const chartOptions = computed(() => ({
       ticks: {
         color: '#aaa',
         font: { size: 11 },
-        callback: v => `${v / 1000}k`
+        callback: v => `${Math.round(v / 1000)}k`
       },
       grid: { color: 'rgba(255,255,255,0.05)' }
     }

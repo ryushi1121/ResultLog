@@ -20,7 +20,9 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
 
 ChartJS.register(
   CategoryScale,
@@ -28,7 +30,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Annotation
 );
 
 const { storeStats } = useAnalytics();
@@ -52,12 +55,13 @@ const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { display: false }
+    legend: { display: false },
+    ...zeroLineAnnotationSingle
   },
   scales: {
     y: {
       grid: { color: 'rgba(255,255,255,0.05)' },
-      ticks: { color: '#8892b0', callback: v => `${v / 1000}k` }
+      ticks: { color: '#8892b0', callback: v => `${Math.round(v / 1000)}k` }
     },
     x: {
       grid: { display: false },

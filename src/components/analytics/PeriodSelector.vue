@@ -42,6 +42,16 @@
         </option>
       </select>
     </div>
+
+    <div class="selector-row store-row">
+      <label class="store-label">機種</label>
+      <select v-model="machineModel" class="store-select">
+        <option value="">全機種</option>
+        <option v-for="machine in availableMachines" :key="machine" :value="machine">
+          {{ machine }}
+        </option>
+      </select>
+    </div>
   </div>
 </template>
 
@@ -50,7 +60,13 @@ import { computed, onMounted } from 'vue';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { useEntries } from '@/composables/useEntries';
 
-const { periodType, periodValue, selectedStore, availableStores } = useAnalytics();
+const { periodType, periodValue, selectedStore, availableStores, selectedMachine, availableMachines } = useAnalytics();
+
+// null ↔ '' の変換（select の v-model 用）
+const machineModel = computed({
+  get: () => selectedMachine.value ?? '',
+  set: (val) => { selectedMachine.value = val === '' ? null : val; }
+});
 const { entries } = useEntries();
 
 const availableYears = computed(() => {

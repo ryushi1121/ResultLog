@@ -41,12 +41,10 @@ import DateSlotAnalytics from '@/components/analytics/DateSlotAnalytics.vue';
 import SpecialDateAnalytics from '@/components/analytics/SpecialDateAnalytics.vue';
 
 const { isLoaded, loadEntries } = useEntries();
-const { selectedMachine, selectedStore, summaryStats, periodType, periodValue } = useAnalytics();
-
+const { selectedStore, summaryStats, periodType, periodValue } = useAnalytics();
 
 onMounted(() => {
   if (!isLoaded.value) loadEntries();
-  selectedMachine.value = null;
 });
 
 const periodLabel = computed(() => {
