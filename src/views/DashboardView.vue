@@ -236,7 +236,7 @@ onMounted(() => {
 }
 
 .page-subtitle {
-  color: #94a3b8;
+  color: var(--text-sub);
   font-size: 0.95rem;
   margin: 0;
 }
@@ -257,7 +257,7 @@ onMounted(() => {
 .view-mode-toggle {
   display: flex;
   gap: 1.5rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--overlay-1);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
 }
@@ -296,7 +296,7 @@ onMounted(() => {
 }
 
 .period-input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+  filter: var(--picker-filter);
   cursor: pointer;
 }
 
@@ -343,13 +343,13 @@ onMounted(() => {
   align-items: center;
   min-height: 200px;
   gap: 1rem;
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid var(--border-subtle);
   border-radius: 50%;
   border-top-color: var(--primary-color, #00d4ff);
   animation: spin 1s ease-in-out infinite;

@@ -73,16 +73,17 @@ const profitClass = computed(() => {
   flex-wrap: wrap;
 }
 .summary-label {
-  color: #aaa;
+  color: var(--text-sub);
   font-size: 0.9rem;
 }
 .summary-amount {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  color: var(--text-main);
 }
 .summary-count {
-  color: #888;
+  color: var(--text-faded);
   font-size: 0.85rem;
   margin-left: auto;
 }

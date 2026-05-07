@@ -15,6 +15,9 @@
     </div>
 
     <div class="header-right">
+      <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'ライトテーマに切替' : 'ダークテーマに切替'">
+        <i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
       <div v-if="user" class="user-info">
         <img
           v-if="user.picture"
@@ -32,13 +35,18 @@
 </template>
 
 <script>
+import { useTheme } from '../../composables/useTheme';
 export default {
   name: 'AppHeader',
   props: {
     user: { type: Object, default: null },
     sidebarOpen: { type: Boolean, default: false }
   },
-  emits: ['toggle-sidebar', 'logout']
+  emits: ['toggle-sidebar', 'logout'],
+  setup() {
+    const { theme, toggleTheme } = useTheme();
+    return { theme, toggleTheme };
+  }
 }
 </script>
 
@@ -49,7 +57,7 @@ export default {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: rgba(10, 10, 20, 0.85);
+  background: var(--header-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--glass-border);
@@ -146,13 +154,25 @@ export default {
   color: var(--text-secondary);
 }
 
-@media (max-width: 768px) {
-  .logo-text {
-    display: none;
-  }
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  margin-right: var(--spacing-sm);
+}
+.theme-toggle:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
 
-  .user-name {
-    display: none;
-  }
+@media (max-width: 768px) {
+  .logo-text { display: none; }
+  .user-name  { display: none; }
 }
 </style>

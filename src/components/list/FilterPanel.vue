@@ -1,47 +1,48 @@
 <template>
   <div class="filter-panel card">
-    <div class="filter-group period-group">
-      <label class="filter-label">期間</label>
-      <div class="period-row">
-        <div class="period-tabs">
-          <button :class="{ active: filters.periodType === 'all' }" @click="setPeriod('all')">全期間</button>
-          <button :class="{ active: filters.periodType === 'year' }" @click="setPeriod('year')">年別</button>
-          <button :class="{ active: filters.periodType === 'month' }" @click="setPeriod('month')">月別</button>
-        </div>
-        <input
-          v-if="filters.periodType === 'month'"
-          type="month"
-          v-model="filters.periodValue"
-          class="form-control period-value"
-        />
-        <select
-          v-else-if="filters.periodType === 'year'"
-          v-model="filters.periodValue"
-          class="form-control period-value"
-        >
-          <option v-for="year in availableYears" :key="year" :value="year">{{ year }}年</option>
-        </select>
+    <!-- 期間行 -->
+    <div class="selector-row">
+      <div class="period-tabs">
+        <button :class="{ active: filters.periodType === 'all' }" @click="setPeriod('all')">全期間</button>
+        <button :class="{ active: filters.periodType === 'year' }" @click="setPeriod('year')">年別</button>
+        <button :class="{ active: filters.periodType === 'month' }" @click="setPeriod('month')">月別</button>
       </div>
+      <input
+        v-if="filters.periodType === 'month'"
+        type="month"
+        v-model="filters.periodValue"
+        class="period-input"
+      />
+      <select
+        v-else-if="filters.periodType === 'year'"
+        v-model="filters.periodValue"
+        class="period-input"
+      >
+        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}年</option>
+      </select>
     </div>
 
-    <div class="filter-group">
-      <label class="filter-label">店舗</label>
-      <select v-model="filters.store" class="form-control">
+    <!-- 店舗行 -->
+    <div class="selector-row sub-row">
+      <label class="row-label">店舗</label>
+      <select v-model="filters.store" class="row-select">
         <option value="">すべての店舗</option>
         <option v-for="store in stores" :key="store" :value="store">{{ store }}</option>
       </select>
     </div>
 
-    <div class="filter-group">
-      <label class="filter-label">機種</label>
-      <select v-model="filters.machine" class="form-control">
+    <!-- 機種行 -->
+    <div class="selector-row sub-row">
+      <label class="row-label">機種</label>
+      <select v-model="filters.machine" class="row-select">
         <option value="">すべての機種</option>
         <option v-for="machine in machines" :key="machine" :value="machine">{{ machine }}</option>
       </select>
     </div>
 
-    <div class="filter-actions">
-      <button @click="resetFilters" class="btn btn-outline-secondary">リセット</button>
+    <!-- リセット行 -->
+    <div class="selector-row sub-row">
+      <button @click="resetFilters" class="reset-btn">リセット</button>
     </div>
   </div>
 </template>
@@ -107,123 +108,133 @@ watch(filters, (newFilters) => {
 onMounted(() => {
   emit('filter-change', { ...filters });
 });
+
+defineExpose({
+  setMonth(yyyyMm) {
+    filters.periodType = 'month';
+    filters.periodValue = yyyyMm;
+  }
+});
 </script>
 
 <style scoped>
 .filter-panel {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: flex-end;
-  background-color: var(--bg-card-color, #16213e);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.filter-group {
-  display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-  min-width: 200px;
+  gap: 12px;
+  padding: 15px 20px;
+  margin-bottom: 2rem;
 }
 
-.period-group {
-  min-width: 320px;
-}
-
-.filter-label {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.period-row {
+.selector-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 12px;
 }
 
+.sub-row {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+/* 期間タブ */
 .period-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .period-tabs button {
-  padding: 0.45rem 0.9rem;
+  padding: 7px 16px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-main);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .period-tabs button:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-hover);
 }
 
 .period-tabs button.active {
-  background: var(--primary-color, #00d4ff);
-  color: #0f0f1a;
-  border-color: var(--primary-color, #00d4ff);
-  font-weight: bold;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  font-weight: 600;
 }
 
-.period-value {
-  width: auto;
-  min-width: 130px;
-}
-
-.period-value::-webkit-calendar-picker-indicator {
-  filter: brightness(0) invert(1);
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  background-color: rgba(15, 15, 26, 0.5);
-  color: var(--text-color, #ffffff);
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  color-scheme: dark;
-}
-
-.form-control:focus {
+/* 期間値 input / select */
+.period-input {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 0.95rem;
   outline: none;
-  border-color: var(--primary-color, #00d4ff);
+  font-family: inherit;
 }
 
-.filter-actions {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2px;
+.period-input:focus {
+  border-color: var(--accent-primary);
 }
 
-.btn {
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
+.period-input option {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.period-input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: var(--picker-filter);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+/* 店舗・機種行 */
+.row-label {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  white-space: nowrap;
+  min-width: 36px;
+}
+
+.row-select {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  min-width: 160px;
+}
+
+.row-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.row-select option {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+/* リセットボタン */
+.reset-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-outline-secondary {
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-outline-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: white;
+.reset-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
 }
 </style>

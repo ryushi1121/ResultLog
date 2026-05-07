@@ -49,8 +49,8 @@ const formattedAmount = computed(() => {
   background-color: var(--bg-card-color, #16213e);
   border-radius: 1rem;
   padding: 1.25rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -59,7 +59,7 @@ const formattedAmount = computed(() => {
 
 .summary-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .summary-header {
@@ -69,7 +69,7 @@ const formattedAmount = computed(() => {
 }
 
 .summary-title {
-  color: #94a3b8;
+  color: var(--text-sub);
   font-size: 0.95rem;
   font-weight: 500;
   margin: 0;
@@ -120,7 +120,7 @@ const formattedAmount = computed(() => {
 
 .summary-footer {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-faded);
   margin-top: auto;
 }
 

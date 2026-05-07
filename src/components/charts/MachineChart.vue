@@ -1,10 +1,13 @@
 <template>
   <div class="chart-container card mb-4">
     <div class="section-header">
-      <h3>機種別 稼働割合</h3>
-      <button v-if="selectedMachine" class="clear-btn" @click="setSelectedMachine(selectedMachine)">
-        {{ selectedMachine }} ✕
-      </button>
+      <h3>機種別 稼働割合<span v-if="showOthers" class="others-badge">その他</span></h3>
+      <div class="header-actions">
+        <button v-if="showOthers" class="clear-btn" @click="showOthers = false">← 戻る</button>
+        <button v-if="selectedMachine" class="clear-btn" @click="setSelectedMachine(selectedMachine)">
+          {{ selectedMachine }} ✕
+        </button>
+      </div>
     </div>
     <div class="chart-wrapper">
       <Doughnut v-if="sortedData.length > 0" :data="chartData" :options="chartOptions" />
@@ -28,7 +31,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as VueChart } from 'vue-chartjs';
 import {
@@ -52,10 +55,15 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, BarControll
 
 const { machineStatsAll, selectedMachine, setSelectedMachine, machineTrendData, machineTrendStats } = useAnalytics();
 
-const COLORS = ['#00d4ff', '#7c3aed', '#22c55e', '#f59e0b', '#ec4899', '#64748b'];
+const COLORS = ['#00d4ff', '#7c3aed', '#22c55e', '#f59e0b', '#ec4899', '#64748b', '#f97316', '#a855f7', '#14b8a6', '#fb7185'];
+
+const showOthers = ref(false);
 
 const sortedData = computed(() => {
   const sorted = [...machineStatsAll.value].sort((a, b) => b.count - a.count);
+  if (showOthers.value) {
+    return sorted.slice(5);
+  }
   const top = sorted.slice(0, 5);
   if (sorted.length > 5) {
     const othersCount = sorted.slice(5).reduce((sum, s) => sum + s.count, 0);
@@ -82,7 +90,9 @@ const chartOptions = computed(() => ({
   onClick: (_event, elements) => {
     if (elements.length === 0) return;
     const name = sortedData.value[elements[0].index]?.name;
-    if (name && name !== 'その他') setSelectedMachine(name);
+    if (!name) return;
+    if (name === 'その他') { showOthers.value = true; }
+    else { setSelectedMachine(name); }
   },
   plugins: {
     legend: {
@@ -90,7 +100,9 @@ const chartOptions = computed(() => ({
       labels: { color: '#e2e8f0' },
       onClick: (_e, legendItem) => {
         const name = sortedData.value[legendItem.index]?.name;
-        if (name && name !== 'その他') setSelectedMachine(name);
+        if (!name) return;
+        if (name === 'その他') { showOthers.value = true; }
+        else { setSelectedMachine(name); }
       }
     }
   }
@@ -101,7 +113,7 @@ const trendData = computed(() => {
   const entries = machineTrendData.value;
   if (!entries || entries.length === 0) return { labels: [], datasets: [] };
 
-  const labels = ['', ...entries.map(e => `第${e.sessionNo}回`)];
+  const labels = ['', ...entries.map(e => e.date.slice(5).replace('-', '/'))];
   const profits = [null, ...entries.map(e => e.profit || 0)];
   const cumulative = [0, ...entries.map(e => e.cumulativeProfit)];
 
@@ -154,7 +166,7 @@ const trendOptions = computed(() => {
             const idx = items[0]?.dataIndex;
             if (!idx || idx < 1) return '';
             const e = entries[idx - 1];
-            return e ? `${e.date}（第${e.sessionNo}回）` : '';
+            return e ? e.date : '';
           },
           label: (ctx) => {
             const val = ctx.parsed.y;
@@ -200,6 +212,22 @@ const trendOptions = computed(() => {
 }
 .section-header h3 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.others-badge {
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 99px;
+  padding: 1px 8px;
+}
+.header-actions {
+  display: flex;
+  gap: 6px;
 }
 .clear-btn {
   font-size: 0.8rem;

@@ -118,71 +118,69 @@ onMounted(() => {
 .period-tabs button {
   padding: 8px 16px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-main);
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
 }
 .period-tabs button:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-hover);
 }
 .period-tabs button.active {
-  background: var(--color-primary, #00d4ff);
-  color: #0f0f1a;
-  border-color: var(--color-primary, #00d4ff);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
   font-weight: bold;
 }
 .period-inputs input,
 .period-inputs select {
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #1a1a2e;
-  color: #fff;
-  color-scheme: dark;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
   font-size: 0.95rem;
   outline: none;
 }
 .period-inputs input:focus,
 .period-inputs select:focus {
-  border-color: var(--color-primary, #00d4ff);
+  border-color: var(--accent-primary);
 }
 .period-inputs select option {
-  background: #1a1a2e;
-  color: #fff;
+  background: var(--bg-input);
+  color: var(--text-main);
 }
-.period-inputs input[type="month"]::-webkit-calendar-picker-indicator,
-.period-inputs input[type="number"]::-webkit-inner-spin-button {
-  filter: brightness(0) invert(1);
+.period-inputs input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: var(--picker-filter);
   cursor: pointer;
   opacity: 0.8;
 }
 .store-row {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 10px;
 }
 .store-label {
   font-size: 0.85rem;
-  color: #aaa;
+  color: var(--text-sub);
   white-space: nowrap;
 }
 .store-select {
   padding: 7px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #1a1a2e;
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
   font-size: 0.9rem;
   outline: none;
   min-width: 160px;
 }
 .store-select:focus {
-  border-color: var(--color-primary, #00d4ff);
+  border-color: var(--accent-primary);
 }
 .store-select option {
-  background: #1a1a2e;
-  color: #fff;
+  background: var(--bg-input);
+  color: var(--text-main);
 }
 </style>

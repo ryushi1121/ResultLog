@@ -86,7 +86,7 @@
 
 .btn-ghost:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-hover);
 }
 
 .btn-lg {
@@ -194,7 +194,7 @@
 }
 
 .data-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-hover);
 }
 
 /* ── Page Layout ── */

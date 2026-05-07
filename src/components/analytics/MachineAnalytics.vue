@@ -205,7 +205,7 @@ const chartOptions = computed(() => {
   transition: background 0.15s;
 }
 .clickable-row:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-hover);
 }
 .row-selected {
   background: rgba(0, 212, 255, 0.1) !important;
@@ -213,12 +213,12 @@ const chartOptions = computed(() => {
 }
 .trend-chart-area {
   margin-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 12px;
 }
 .trend-chart-title {
   font-size: 0.9rem;
-  color: #ccc;
+  color: var(--text-sub);
   margin-bottom: 8px;
 }
 .trend-stats {
@@ -229,10 +229,10 @@ const chartOptions = computed(() => {
 }
 .stat-item {
   font-size: 0.8rem;
-  color: #aaa;
+  color: var(--text-sub);
 }
 .stat-item strong {
-  color: #e2e8f0;
+  color: var(--text-main);
   margin-left: 4px;
 }
 .chart-wrapper {

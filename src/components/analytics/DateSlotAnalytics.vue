@@ -129,12 +129,12 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
   margin-bottom: 20px;
 }
 .match-section {
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 16px;
 }
 .match-label {
   font-size: 0.85rem;
-  color: #aaa;
+  color: var(--text-sub);
   margin-bottom: 12px;
 }
 .match-cards {
@@ -147,23 +147,23 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
   min-width: 140px;
   padding: 14px 16px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--overlay-1);
+  border: 1px solid var(--border-subtle);
 }
 .match-card--match {
-  border-color: rgba(0,212,255,0.3);
+  border-color: rgba(var(--accent-primary-rgb), 0.3);
 }
 .match-card-title {
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 4px;
-  color: #ccc;
+  color: var(--text-main);
 }
 .match-card-count {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 10px;
-  color: #fff;
+  color: var(--text-main);
 }
 .match-card-row {
   display: flex;
@@ -172,11 +172,11 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
   margin-bottom: 5px;
   font-size: 0.85rem;
 }
-.mc-label { color: #888; }
+.mc-label { color: var(--text-faded); }
 .mc-value { font-weight: 600; }
 .no-slot-note {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-faded);
   padding: 8px 0;
 }
 @media (max-width: 600px) {

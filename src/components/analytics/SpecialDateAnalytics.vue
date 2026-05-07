@@ -164,13 +164,13 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
 h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #ccc;
+  color: var(--text-main);
   margin: 0 0 14px;
 }
 .section-title-mt {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* 日付ゾロ目日カード */
@@ -185,19 +185,19 @@ h3 {
   min-width: 130px;
   padding: 14px 16px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(0,212,255,0.2);
+  background: var(--overlay-1);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.2);
 }
 .zd-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #00d4ff;
+  color: var(--accent-primary);
   margin-bottom: 4px;
 }
 .zd-count {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-main);
   margin-bottom: 10px;
 }
 .zd-row {
@@ -207,7 +207,7 @@ h3 {
   margin-bottom: 5px;
   font-size: 0.85rem;
 }
-.zd-label { color: #888; }
+.zd-label { color: var(--text-faded); }
 .zd-value { font-weight: 600; }
 
 /* 月日ゾロ目サマリー */
@@ -217,8 +217,8 @@ h3 {
   flex-wrap: wrap;
   padding: 12px 16px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--overlay-1);
+  border: 1px solid var(--border-subtle);
   margin-bottom: 16px;
 }
 .zs-item {
@@ -228,12 +228,12 @@ h3 {
 }
 .zs-label {
   font-size: 0.78rem;
-  color: #888;
+  color: var(--text-faded);
 }
 .zs-value {
   font-size: 1rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-main);
 }
 
 /* 棒グラフ横スクロール */

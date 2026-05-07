@@ -82,8 +82,8 @@ const getProfitClass = (profit) => {
 .card {
   background-color: var(--bg-card-color, #16213e);
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   padding: 1.5rem;
 }
 
@@ -108,7 +108,7 @@ const getProfitClass = (profit) => {
 
 .stat-label {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .stat-value {
@@ -121,13 +121,13 @@ const getProfitClass = (profit) => {
 .unit {
   font-size: 1rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .stat-value.good { color: var(--success-color, #22c55e); }
 .stat-value.positive { color: var(--success-color, #22c55e); }
 .stat-value.negative { color: var(--danger-color, #ef4444); }
-.stat-value.zero { color: #94a3b8; }
+.stat-value.zero { color: var(--text-sub); }
 
 @media (max-width: 480px) {
   .card {

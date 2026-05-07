@@ -61,8 +61,8 @@ const getProfitClass = (profit) => {
 .card {
   background-color: var(--bg-card-color, #16213e);
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -104,21 +104,21 @@ const getProfitClass = (profit) => {
   display: flex;
   align-items: center;
   padding: 1rem;
-  background-color: rgba(15, 15, 26, 0.4);
+  background-color: var(--overlay-1);
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
   transition: background-color 0.2s ease;
 }
 
 .history-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--surface-hover);
 }
 
 .item-date {
   display: flex;
   flex-direction: column;
   min-width: 80px;
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .item-date .day {
@@ -148,7 +148,7 @@ const getProfitClass = (profit) => {
 
 .machine-info {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-sub);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,7 +164,7 @@ const getProfitClass = (profit) => {
 
 .item-profit.positive { color: var(--success-color, #22c55e); }
 .item-profit.negative { color: var(--danger-color, #ef4444); }
-.item-profit.zero { color: #94a3b8; }
+.item-profit.zero { color: var(--text-sub); }
 
 .empty-state {
   display: flex;
@@ -172,7 +172,7 @@ const getProfitClass = (profit) => {
   align-items: center;
   justify-content: center;
   padding: 3rem 0;
-  color: #64748b;
+  color: var(--text-faded);
   gap: 1rem;
 }
 

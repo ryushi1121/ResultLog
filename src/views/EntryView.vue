@@ -42,7 +42,7 @@ const isEdit = computed(() => !!route.params.id);
 }
 
 .page-subtitle {
-  color: #94a3b8;
+  color: var(--text-sub);
   font-size: 0.95rem;
 }
 

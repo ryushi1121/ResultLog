@@ -63,7 +63,7 @@ export default {
   left: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: rgba(15, 15, 26, 0.95);
+  background: var(--sidebar-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--glass-border);
@@ -103,7 +103,7 @@ export default {
 
 .nav-item:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-hover);
 }
 
 .nav-item.active {
@@ -157,7 +157,7 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay-modal);
     z-index: calc(var(--z-sidebar) - 1);
     animation: fadeIn var(--transition-fast) ease;
   }

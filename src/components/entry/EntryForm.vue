@@ -289,11 +289,11 @@ const submitForm = async () => {
 .entry-form-container {
   max-width: 600px;
   margin: 0 auto;
-  background-color: var(--bg-card-color, #16213e);
+  background-color: var(--bg-card-color);
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-subtle);
 }
 
 .entry-form {
@@ -314,10 +314,10 @@ const submitForm = async () => {
 }
 
 .form-section {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--overlay-1);
   border-radius: 0.75rem;
   padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
 }
 
 .section-header {
@@ -335,11 +335,11 @@ const submitForm = async () => {
   margin-top: 0.75rem;
   text-align: right;
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .total-display strong {
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 1rem;
 }
 
@@ -356,11 +356,18 @@ const submitForm = async () => {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  background-color: rgba(15, 15, 26, 0.5);
-  color: var(--text-color, #ffffff);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  color: var(--text-main);
   font-size: 1rem;
   transition: all 0.2s ease;
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator,
+.form-control[type="time"]::-webkit-calendar-picker-indicator {
+  filter: var(--picker-filter);
+  cursor: pointer;
+  opacity: 0.7;
 }
 
 .form-control:focus {
@@ -394,14 +401,14 @@ textarea.form-control {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--overlay-1);
   border-radius: 0.5rem;
   font-size: 1.25rem;
   font-weight: 700;
 }
 
 .profit-label {
-  color: #94a3b8;
+  color: var(--text-sub);
 }
 
 .profit-display.positive .profit-amount {
