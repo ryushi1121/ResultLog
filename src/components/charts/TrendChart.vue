@@ -10,6 +10,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useTheme } from '@/composables/useTheme';
 import { Chart as VueChart } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -30,6 +31,15 @@ import { computeSyncedBounds, zeroLineAnnotation } from '@/utils/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, LineElement, LineController, PointElement, Tooltip, Legend, Annotation);
 
 const { trendChartData } = useAnalytics();
+const { theme } = useTheme();
+
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const chartData = computed(() => {
   const data = trendChartData.value;
@@ -76,7 +86,7 @@ const chartOptions = computed(() => {
     interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: {
-        labels: { color: '#ccc', font: { size: 12 } }
+        labels: { color: cc.value.textSub, font: { size: 12 } }
       },
       tooltip: {
         callbacks: {
@@ -91,8 +101,8 @@ const chartOptions = computed(() => {
     },
     scales: {
       x: {
-        ticks: { color: '#aaa', font: { size: 11 } },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        ticks: { color: cc.value.textSub, font: { size: 11 } },
+        grid: { color: cc.value.grid }
       },
       yLeft: {
         type: 'linear',
@@ -100,11 +110,11 @@ const chartOptions = computed(() => {
         min: bounds?.left.min,
         max: bounds?.left.max,
         ticks: {
-          color: '#aaa',
+          color: cc.value.textSub,
           font: { size: 11 },
           callback: v => `${Math.round(v / 1000)}k`
         },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        grid: { color: cc.value.grid }
       },
       yRight: {
         type: 'linear',

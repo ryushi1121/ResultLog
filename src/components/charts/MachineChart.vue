@@ -49,15 +49,27 @@ import {
 } from 'chart.js';
 import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { useTheme } from '@/composables/useTheme';
 import { computeSyncedBounds, zeroLineAnnotation } from '@/utils/chartUtils';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, BarController, LineElement, LineController, PointElement, Tooltip, Legend, Annotation);
 
 const { machineStatsAll, selectedMachine, setSelectedMachine, machineTrendData, machineTrendStats } = useAnalytics();
+const { theme } = useTheme();
 
 const COLORS = ['#00d4ff', '#7c3aed', '#22c55e', '#f59e0b', '#ec4899', '#64748b', '#f97316', '#a855f7', '#14b8a6', '#fb7185'];
 
 const showOthers = ref(false);
+
+// テーマに応じたチャート用カラー
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    text:    isLight ? '#586e75' : '#93a1a1',
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const sortedData = computed(() => {
   const sorted = [...machineStatsAll.value].sort((a, b) => b.count - a.count);
@@ -97,7 +109,7 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: {
       position: 'right',
-      labels: { color: '#e2e8f0' },
+      labels: { color: cc.value.text },
       onClick: (_e, legendItem) => {
         const name = sortedData.value[legendItem.index]?.name;
         if (!name) return;
@@ -159,7 +171,7 @@ const trendOptions = computed(() => {
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     plugins: {
-      legend: { labels: { color: '#ccc', font: { size: 12 } } },
+      legend: { labels: { color: cc.value.textSub, font: { size: 12 } } },
       tooltip: {
         callbacks: {
           title: (items) => {
@@ -179,16 +191,16 @@ const trendOptions = computed(() => {
     },
     scales: {
       x: {
-        ticks: { color: '#aaa', font: { size: 11 } },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        ticks: { color: cc.value.textSub, font: { size: 11 } },
+        grid: { color: cc.value.grid }
       },
       yLeft: {
         type: 'linear',
         position: 'left',
         min: bounds?.left.min,
         max: bounds?.left.max,
-        ticks: { color: '#aaa', font: { size: 11 }, callback: v => `${Math.round(v / 1000)}k` },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        ticks: { color: cc.value.textSub, font: { size: 11 }, callback: v => `${Math.round(v / 1000)}k` },
+        grid: { color: cc.value.grid }
       },
       yRight: {
         type: 'linear',
@@ -251,12 +263,12 @@ const trendOptions = computed(() => {
 }
 .trend-chart-area {
   margin-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 12px;
 }
 .trend-chart-title {
   font-size: 0.9rem;
-  color: #ccc;
+  color: var(--text-sub);
   margin-bottom: 8px;
 }
 .trend-stats {
@@ -267,10 +279,10 @@ const trendOptions = computed(() => {
 }
 .stat-item {
   font-size: 0.8rem;
-  color: #aaa;
+  color: var(--text-sub);
 }
 .stat-item strong {
-  color: #e2e8f0;
+  color: var(--text-main);
   margin-left: 4px;
 }
 .trend-chart-wrapper {

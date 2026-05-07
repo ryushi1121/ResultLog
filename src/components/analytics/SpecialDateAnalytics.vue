@@ -72,11 +72,21 @@ import {
 } from 'chart.js';
 import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { useTheme } from '@/composables/useTheme';
 import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Annotation);
 
 const { dayZoromeStats, monthDayZoromeStats } = useAnalytics();
+const { theme } = useTheme();
+
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const monthDayTotal = computed(() => {
   let count = 0, winCount = 0, profit = 0;
@@ -138,16 +148,16 @@ const chartOptions = computed(() => ({
   },
   scales: {
     x: {
-      ticks: { color: '#aaa', font: { size: 11 } },
-      grid: { color: 'rgba(255,255,255,0.05)' }
+      ticks: { color: cc.value.textSub, font: { size: 11 } },
+      grid: { color: cc.value.grid }
     },
     y: {
       ticks: {
-        color: '#aaa',
+        color: cc.value.textSub,
         font: { size: 11 },
         callback: v => `${Math.round(v / 1000)}k`
       },
-      grid: { color: 'rgba(255,255,255,0.05)' }
+      grid: { color: cc.value.grid }
     }
   }
 }));

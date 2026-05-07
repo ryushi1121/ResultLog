@@ -51,11 +51,21 @@ import {
 } from 'chart.js';
 import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
+import { useTheme } from '@/composables/useTheme';
 import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Annotation);
 
 const { dateSuffixStats, slotMatchStats } = useAnalytics();
+const { theme } = useTheme();
+
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const chartData = computed(() => ({
   labels: dateSuffixStats.value.map(s => `末尾${s.suffix}`),
@@ -79,7 +89,7 @@ const chartOptions = computed(() => ({
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
-    legend: { labels: { color: '#ccc', font: { size: 12 } } },
+    legend: { labels: { color: cc.value.textSub, font: { size: 12 } } },
     tooltip: {
       callbacks: {
         label: (ctx) => {
@@ -98,16 +108,16 @@ const chartOptions = computed(() => ({
   },
   scales: {
     x: {
-      ticks: { color: '#aaa', font: { size: 11 } },
-      grid: { color: 'rgba(255,255,255,0.05)' }
+      ticks: { color: cc.value.textSub, font: { size: 11 } },
+      grid: { color: cc.value.grid }
     },
     y: {
       ticks: {
-        color: '#aaa',
+        color: cc.value.textSub,
         font: { size: 11 },
         callback: v => `${Math.round(v / 1000)}k`
       },
-      grid: { color: 'rgba(255,255,255,0.05)' }
+      grid: { color: cc.value.grid }
     }
   }
 }));

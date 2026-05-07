@@ -11,6 +11,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
+import { useTheme } from '@/composables/useTheme';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,6 +36,15 @@ ChartJS.register(
 );
 
 const { storeStats } = useAnalytics();
+const { theme } = useTheme();
+
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const chartData = computed(() => {
   const data = storeStats.value.slice(0, 10);
@@ -51,7 +61,7 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -60,15 +70,15 @@ const chartOptions = {
   },
   scales: {
     y: {
-      grid: { color: 'rgba(255,255,255,0.05)' },
-      ticks: { color: '#8892b0', callback: v => `${Math.round(v / 1000)}k` }
+      grid: { color: cc.value.grid },
+      ticks: { color: cc.value.textSub, callback: v => `${Math.round(v / 1000)}k` }
     },
     x: {
       grid: { display: false },
-      ticks: { color: '#8892b0' }
+      ticks: { color: cc.value.textSub }
     }
   }
-};
+}));
 </script>
 
 <style scoped>

@@ -57,6 +57,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Chart as VueChart } from 'vue-chartjs';
+import { useTheme } from '@/composables/useTheme';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -75,6 +76,15 @@ import { formatCurrency } from '@/utils/formatters';
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, LineElement, LineController, PointElement, Tooltip, Legend);
 
 const { machineStats, selectedMachine, setSelectedMachine, machineTrendData, machineTrendStats } = useAnalytics();
+const { theme } = useTheme();
+
+const cc = computed(() => {
+  const isLight = theme.value === 'light';
+  return {
+    textSub: isLight ? '#657b83' : '#839496',
+    grid:    isLight ? 'rgba(101,123,131,0.12)' : 'rgba(255,255,255,0.05)'
+  };
+});
 
 const getProfitClass = (val) => {
   if (val > 0) return 'text-success';
@@ -129,7 +139,7 @@ const chartOptions = computed(() => {
     interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: {
-        labels: { color: '#ccc', font: { size: 12 } }
+        labels: { color: cc.value.textSub, font: { size: 12 } }
       },
       tooltip: {
         callbacks: {
@@ -149,18 +159,18 @@ const chartOptions = computed(() => {
     },
     scales: {
       x: {
-        ticks: { color: '#aaa', font: { size: 11 } },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        ticks: { color: cc.value.textSub, font: { size: 11 } },
+        grid: { color: cc.value.grid }
       },
       yLeft: {
         type: 'linear',
         position: 'left',
         ticks: {
-          color: '#aaa',
+          color: cc.value.textSub,
           font: { size: 11 },
           callback: v => `${v / 1000}k`
         },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+        grid: { color: cc.value.grid }
       },
       yRight: {
         type: 'linear',
