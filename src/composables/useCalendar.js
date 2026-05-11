@@ -45,7 +45,7 @@ export const useCalendar = () => {
   };
 
   const fetchEntries = async (timeMin = null, timeMax = null) => {
-    const buildUrl = (queryTerm) => {
+    const buildBaseUrl = (queryTerm) => {
       let url = `${API_BASE}?q=${encodeURIComponent(queryTerm)}&maxResults=2500&singleEvents=true&orderBy=startTime`;
       if (timeMin) url += `&timeMin=${new Date(timeMin).toISOString()}`;
       if (timeMax) {
@@ -56,12 +56,26 @@ export const useCalendar = () => {
       return url;
     };
 
-    const [dataNew, dataOld] = await Promise.all([
-      fetchWithRetry(buildUrl('ResultLog')),
-      fetchWithRetry(buildUrl('収支管理'))
+    // nextPageToken によるページネーションを処理して全件取得する
+    const fetchAllPages = async (queryTerm) => {
+      const baseUrl = buildBaseUrl(queryTerm);
+      const allItems = [];
+      let pageToken = null;
+      do {
+        const url = pageToken ? `${baseUrl}&pageToken=${encodeURIComponent(pageToken)}` : baseUrl;
+        const data = await fetchWithRetry(url);
+        allItems.push(...(data?.items || []));
+        pageToken = data?.nextPageToken ?? null;
+      } while (pageToken);
+      return allItems;
+    };
+
+    const [itemsNew, itemsOld] = await Promise.all([
+      fetchAllPages('ResultLog'),
+      fetchAllPages('収支管理')
     ]);
 
-    const items = [...(dataNew?.items || []), ...(dataOld?.items || [])];
+    const items = [...itemsNew, ...itemsOld];
     const uniqueItems = Array.from(new Map(items.map(item => [item.id, item])).values());
 
     return uniqueItems

@@ -73,7 +73,7 @@
                 <span class="store-rate">{{ settings.exchangeRate }} 枚交換</span>
               </div>
               <button class="btn-icon btn-delete" @click="handleRemoveStore(store)" title="削除">
-                🗑️
+                <i class="fa-solid fa-trash"></i>
               </button>
             </li>
           </ul>
@@ -185,7 +185,7 @@ const handleSync = async () => {
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 1.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 10px;
 }
 
@@ -206,7 +206,7 @@ const handleSync = async () => {
 .account-name {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .account-email {
@@ -222,8 +222,8 @@ const handleSync = async () => {
 
 .app-info-list li {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-sub);
 }
 
 .app-info-list li:last-child {
@@ -231,7 +231,7 @@ const handleSync = async () => {
 }
 
 .app-info-list strong {
-  color: #fff;
+  color: var(--text-main);
   margin-right: 8px;
 }
 
@@ -246,10 +246,10 @@ const handleSync = async () => {
 }
 
 .store-rate-form {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--overlay-1);
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
 }
 
 .rate-input-group {
@@ -281,9 +281,9 @@ const handleSync = async () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background-color: rgba(15, 15, 26, 0.5);
+  background-color: var(--overlay-2);
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .store-rate-info {
@@ -294,7 +294,7 @@ const handleSync = async () => {
 
 .store-name {
   font-weight: 500;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .store-rate {
@@ -306,10 +306,11 @@ const handleSync = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   opacity: 0.7;
   transition: opacity 0.2s;
   padding: 4px;
+  color: var(--danger-color);
 }
 
 .btn-icon:hover {
