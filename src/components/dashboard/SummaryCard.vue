@@ -10,8 +10,9 @@
       <span class="currency-symbol">¥</span>
       <span class="amount">{{ formattedAmount }}</span>
     </div>
-    <div v-if="subtitle" class="summary-footer">
-      {{ subtitle }}
+    <div class="summary-footer">
+      <span v-if="subtitle" class="subtitle-text">{{ subtitle }}</span>
+      <router-link v-if="link" :to="link" class="card-link">{{ linkLabel }} <i class="fa-solid fa-arrow-right"></i></router-link>
     </div>
   </div>
 </template>
@@ -36,6 +37,14 @@ const props = defineProps({
   isProfit: {
     type: Boolean,
     default: false
+  },
+  link: {
+    type: [String, Object],
+    default: ''
+  },
+  linkLabel: {
+    type: String,
+    default: '詳細を見る'
   }
 });
 
@@ -119,9 +128,27 @@ const formattedAmount = computed(() => {
 }
 
 .summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.subtitle-text {
   font-size: 0.85rem;
   color: var(--text-faded);
-  margin-top: auto;
+}
+
+.card-link {
+  font-size: 0.85rem;
+  color: var(--primary-color, #00d4ff);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  margin-left: auto;
+}
+
+.card-link:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 480px) {

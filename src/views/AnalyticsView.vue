@@ -27,6 +27,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useEntries } from '@/composables/useEntries';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { formatProfit } from '@/utils/formatters';
@@ -35,11 +36,17 @@ import DailyTrendChart from '@/components/analytics/DailyTrendChart.vue';
 import MachineAnalytics from '@/components/analytics/MachineAnalytics.vue';
 import WeekdayAnalytics from '@/components/analytics/WeekdayAnalytics.vue';
 
+const route = useRoute();
 const { isLoaded, loadEntries } = useEntries();
 const { summaryStats, periodType, periodValue, selectedStore } = useAnalytics();
 
 onMounted(() => {
   if (!isLoaded.value) loadEntries();
+  const { mode, value } = route.query;
+  if (mode && value) {
+    periodType.value = mode;
+    periodValue.value = value;
+  }
 });
 
 const periodLabel = computed(() => {

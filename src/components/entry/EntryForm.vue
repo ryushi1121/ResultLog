@@ -176,7 +176,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEntries } from '../../composables/useEntries';
 import { useStoreSettings } from '../../composables/useStoreSettings';
@@ -195,8 +195,7 @@ const router = useRouter();
 const { entries, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
 const { calculateYen } = useStoreSettings();
 
-// Initialize form data
-const formData = ref({
+const emptyForm = () => ({
   date: formatDateForAPI(new Date()),
   store: '',
   machine: '',
@@ -209,6 +208,8 @@ const formData = ref({
   endTime: '',
   memo: ''
 });
+
+const formData = ref(emptyForm());
 
 // Computed totals using store exchange rate
 const totalInvestment = computed(() => {
@@ -232,11 +233,11 @@ const formattedProfit = computed(() => formatProfit(profit.value));
 
 const isEditMode = computed(() => !!props.entryId);
 
-onMounted(() => {
-  if (isEditMode.value) {
+const initForm = () => {
+  if (props.entryId) {
     const existing = entries.value.find(e => e.id === props.entryId);
     if (existing) {
-      formData.value = { 
+      formData.value = {
         ...existing,
         investmentCash: existing.investmentCash !== undefined ? existing.investmentCash : existing.investment || '',
         investmentMedal: existing.investmentMedal || '',
@@ -244,8 +245,15 @@ onMounted(() => {
         collectionMedal: existing.collectionMedal || ''
       };
     }
+  } else {
+    formData.value = emptyForm();
   }
-});
+};
+
+onMounted(initForm);
+
+// /entry/:id → /entry への遷移でコンポーネントが再利用されるため watch で再初期化
+watch(() => props.entryId, initForm);
 
 const handleDelete = async () => {
   const entry = entries.value.find(e => e.id === props.entryId);

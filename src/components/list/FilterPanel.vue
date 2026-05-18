@@ -113,6 +113,10 @@ defineExpose({
   setMonth(yyyyMm) {
     filters.periodType = 'month';
     filters.periodValue = yyyyMm;
+  },
+  setPeriod(type, value) {
+    filters.periodType = type;
+    filters.periodValue = value;
   }
 });
 </script>

@@ -1,7 +1,10 @@
 <template>
   <div class="quick-stats card">
-    <h3 class="card-title">{{ title || '成績サマリー' }}</h3>
-    
+    <div class="card-header">
+      <h3 class="card-title">{{ title || '成績サマリー' }}</h3>
+      <router-link :to="chartsLink" class="card-link">分析を見る <i class="fa-solid fa-arrow-right"></i></router-link>
+    </div>
+
     <div class="stats-grid">
       <div class="stat-item">
         <div class="stat-label">勝率</div>
@@ -45,6 +48,10 @@ const props = defineProps({
   title: {
     type: String,
     default: '成績サマリー'
+  },
+  chartsLink: {
+    type: [String, Object],
+    default: '/charts'
   }
 });
 
@@ -87,11 +94,29 @@ const getProfitClass = (profit) => {
   padding: 1.5rem;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .card-title {
-  margin: 0 0 1.5rem 0;
+  margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-color, #ffffff);
+}
+
+.card-link {
+  font-size: 0.85rem;
+  color: var(--primary-color, #00d4ff);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.card-link:hover {
+  opacity: 0.8;
 }
 
 .stats-grid {

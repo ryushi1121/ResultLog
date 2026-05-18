@@ -66,12 +66,14 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useEntries } from '../composables/useEntries';
 import FilterPanel from '../components/list/FilterPanel.vue';
 import EntryTable from '../components/list/EntryTable.vue';
 import MonthCalendar from '../components/list/MonthCalendar.vue';
 import { exportCSV } from '../utils/csvExporter';
 
+const route = useRoute();
 const { entries, isLoading, error, loadEntries, removeEntry, removeBulk, suggestStores, suggestMachines, isLoaded } = useEntries();
 const currentFilters = ref(null);
 const viewMode = ref('calendar'); // 'calendar' | 'list'
@@ -172,6 +174,11 @@ const forceReload = () => {
 onMounted(() => {
   if (!isLoaded.value) {
     loadEntries();
+  }
+  const { mode, value } = route.query;
+  if (mode && value) {
+    // FilterPanel の ref はマウント直後に使える
+    filterPanelRef.value?.setPeriod(mode, value);
   }
 });
 </script>

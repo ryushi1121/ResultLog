@@ -58,27 +58,38 @@
     <div v-else class="dashboard-content">
       <!-- サマリーカード群 -->
       <div class="summary-cards">
-        <SummaryCard 
-          :title="`${targetPeriodText}の総投資`" 
-          :amount="currentPeriodStats.investment" 
-          subtitle="Total Investment"
-        />
-        <SummaryCard 
-          :title="`${targetPeriodText}の総回収`" 
-          :amount="currentPeriodStats.collection" 
-          subtitle="Total Collection"
-        />
-        <SummaryCard 
-          :title="`${targetPeriodText}の収支`" 
-          :amount="currentPeriodStats.profit" 
+        <!-- 投資・回収 統合パネル -->
+        <div class="investment-card card">
+          <div class="invest-header">
+            <h3 class="invest-title">{{ targetPeriodText }}の投資 / 回収</h3>
+            <router-link :to="listLink" class="card-link">一覧を見る <i class="fa-solid fa-arrow-right"></i></router-link>
+          </div>
+          <div class="invest-body">
+            <div class="invest-col">
+              <div class="invest-label">総投資</div>
+              <div class="invest-amount investment">¥{{ formatCurrency(currentPeriodStats.investment) }}</div>
+            </div>
+            <div class="invest-divider"></div>
+            <div class="invest-col">
+              <div class="invest-label">総回収</div>
+              <div class="invest-amount collection">¥{{ formatCurrency(currentPeriodStats.collection) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 収支パネル -->
+        <SummaryCard
+          :title="`${targetPeriodText}の収支`"
+          :amount="currentPeriodStats.profit"
           :isProfit="true"
-          subtitle="Total Profit"
+          :link="analyticsLink"
+          linkLabel="集計を見る"
         />
       </div>
 
       <div class="dashboard-grid">
         <!-- クイック統計 -->
-        <QuickStats :entries="currentPeriodEntries" :title="`${targetPeriodText}の成績サマリー`" class="grid-item" />
+        <QuickStats :entries="currentPeriodEntries" :title="`${targetPeriodText}の成績サマリー`" :chartsLink="chartsLink" class="grid-item" />
 
         <!-- 直近の履歴 -->
         <RecentHistory :entries="entries" :limit="5" class="grid-item" />
@@ -90,6 +101,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useEntries } from '../composables/useEntries';
+import { formatCurrency } from '../utils/formatters';
 import SummaryCard from '../components/dashboard/SummaryCard.vue';
 import QuickStats from '../components/dashboard/QuickStats.vue';
 import RecentHistory from '../components/dashboard/RecentHistory.vue';
@@ -178,6 +190,18 @@ const currentPeriodStats = computed(() => {
 const onPeriodChange = () => {
   // ローカルでフィルタされるため再取得不要
 };
+
+// 各ページへ渡す期間クエリ
+const periodQuery = computed(() => {
+  if (viewMode.value === 'year') {
+    return { mode: 'year', value: String(currentDate.value.getFullYear()) };
+  }
+  return { mode: 'month', value: selectedMonthStr.value };
+});
+
+const listLink = computed(() => ({ path: '/list', query: periodQuery.value }));
+const analyticsLink = computed(() => ({ path: '/analytics', query: periodQuery.value }));
+const chartsLink = computed(() => ({ path: '/charts', query: periodQuery.value }));
 
 const loadData = () => {
   if (!isLoaded.value) {
@@ -319,9 +343,94 @@ onMounted(() => {
 
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 投資・回収 統合カード */
+.card {
+  background-color: var(--bg-card-color, #16213e);
+  border-radius: 1rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  padding: 1.25rem 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.invest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.invest-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.card-link {
+  font-size: 0.85rem;
+  color: var(--primary-color, #00d4ff);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.card-link:hover {
+  opacity: 0.8;
+}
+
+.invest-body {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.invest-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.invest-divider {
+  width: 1px;
+  height: 3rem;
+  background-color: var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.invest-label {
+  font-size: 0.8rem;
+  color: var(--text-faded);
+}
+
+.invest-amount {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.invest-amount.investment {
+  color: var(--danger-color, #ef4444);
+}
+
+.invest-amount.collection {
+  color: var(--success-color, #22c55e);
 }
 
 .dashboard-grid {

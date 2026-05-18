@@ -29,6 +29,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useEntries } from '@/composables/useEntries';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { formatProfit } from '@/utils/formatters';
@@ -40,11 +41,17 @@ import WeekdayChart from '@/components/charts/WeekdayChart.vue';
 import DateSlotAnalytics from '@/components/analytics/DateSlotAnalytics.vue';
 import SpecialDateAnalytics from '@/components/analytics/SpecialDateAnalytics.vue';
 
+const route = useRoute();
 const { isLoaded, loadEntries } = useEntries();
 const { selectedStore, summaryStats, periodType, periodValue } = useAnalytics();
 
 onMounted(() => {
   if (!isLoaded.value) loadEntries();
+  const { mode, value } = route.query;
+  if (mode && value) {
+    periodType.value = mode;
+    periodValue.value = value;
+  }
 });
 
 const periodLabel = computed(() => {

@@ -6,21 +6,28 @@
     </div>
     
     <div class="history-list" v-if="entries.length > 0">
-      <div v-for="entry in recentEntries" :key="entry.id" class="history-item">
+      <router-link
+        v-for="entry in recentEntries"
+        :key="entry.id"
+        :to="'/entry/' + entry.id"
+        class="history-item"
+      >
         <div class="item-date">
           <span class="day">{{ formatDateDisplay(entry.date) }}</span>
           <span class="dow">{{ entry.dayOfWeek }}</span>
         </div>
-        
+
         <div class="item-details">
           <div class="store-info">{{ entry.store }}</div>
           <div class="machine-info" v-if="entry.machine">{{ entry.machine }}</div>
         </div>
-        
+
         <div class="item-profit" :class="getProfitClass(entry.profit)">
           {{ formatProfit(entry.profit) }}
         </div>
-      </div>
+
+        <i class="fa-solid fa-chevron-right item-arrow"></i>
+      </router-link>
     </div>
     
     <div v-else class="empty-state">
@@ -108,10 +115,20 @@ const getProfitClass = (profit) => {
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
   transition: background-color 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .history-item:hover {
   background-color: var(--surface-hover);
+}
+
+.item-arrow {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .item-date {
