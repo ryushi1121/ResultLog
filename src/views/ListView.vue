@@ -1,13 +1,8 @@
 <template>
   <div class="list-view">
     <div class="page-header">
-      <div>
-        <h1 class="page-title">収支一覧</h1>
-        <p class="page-subtitle">記録した収支の詳細を確認・管理できます</p>
-      </div>
-      <button class="btn btn-export" @click="handleExport" :disabled="filteredEntries.length === 0">
-        <i class="fa-solid fa-file-csv"></i> CSV出力
-      </button>
+      <h1 class="page-title">収支一覧</h1>
+      <p class="page-subtitle">記録した収支の詳細を確認・管理できます</p>
     </div>
 
     <FilterPanel
@@ -28,9 +23,9 @@
     </div>
 
     <div v-else class="list-content">
-      <!-- 月別のみ表示切替 + カレンダーナビ -->
-      <div v-if="isMonthMode" class="cal-header-row">
-        <div class="view-toggle">
+      <!-- 常時表示のアクションバー -->
+      <div class="action-bar">
+        <div v-if="isMonthMode" class="view-toggle">
           <button :class="{ active: viewMode === 'calendar' }" @click="viewMode = 'calendar'">
             <i class="fa-solid fa-calendar-days"></i> カレンダー
           </button>
@@ -38,7 +33,7 @@
             <i class="fa-solid fa-list"></i> リスト
           </button>
         </div>
-        <div v-if="viewMode === 'calendar'" class="cal-nav">
+        <div v-if="isMonthMode && viewMode === 'calendar'" class="cal-nav">
           <button class="cal-nav-btn" @click="prevMonth">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
@@ -47,6 +42,9 @@
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
+        <button class="btn btn-export" @click="handleExport" :disabled="filteredEntries.length === 0">
+          <i class="fa-solid fa-file-csv"></i> CSV出力
+        </button>
       </div>
 
       <MonthCalendar
@@ -130,7 +128,7 @@ const filteredEntries = computed(() => {
     const target = (viewMode.value === 'calendar' && calendarMonth.value) ? calendarMonth.value : periodValue;
     if (target) result = result.filter(e => e.date.startsWith(target));
   } else if (periodType === 'year' && periodValue) {
-    result = result.filter(e => e.date.startsWith(periodValue));
+    result = result.filter(e => e.date.startsWith(periodValue.substring(0, 4)));
   }
 
   if (store) result = result.filter(e => e.store === store);
@@ -147,7 +145,7 @@ const handleExport = () => {
   const f = currentFilters.value;
   let filename = 'resultlog';
   if (f?.periodType === 'month' && f.periodValue) filename += `_${f.periodValue}`;
-  else if (f?.periodType === 'year' && f.periodValue) filename += `_${f.periodValue}`;
+  else if (f?.periodType === 'year' && f.periodValue) filename += `_${f.periodValue.substring(0, 4)}`;
   exportCSV(filteredEntries.value, `${filename}.csv`);
 };
 
@@ -185,15 +183,7 @@ onMounted(() => {
 
 <style scoped>
 .list-view {
-  padding: 1rem;
   animation: fadeIn 0.3s ease-out;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
 }
 
 .btn-export {
@@ -219,18 +209,6 @@ onMounted(() => {
 .btn-export:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-color, #ffffff);
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  color: var(--text-sub);
-  font-size: 0.95rem;
 }
 
 .loading-state, .error-state {
@@ -261,7 +239,7 @@ onMounted(() => {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.cal-header-row {
+.action-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;

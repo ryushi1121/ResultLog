@@ -19,7 +19,7 @@ export const useAnalytics = () => {
         return entry.date && entry.date.startsWith(periodValue.value);
       }
       if (periodType.value === 'year') {
-        return entry.date && entry.date.startsWith(periodValue.value);
+        return entry.date && entry.date.startsWith(periodValue.value.substring(0, 4));
       }
       return true;
     });
@@ -297,7 +297,7 @@ export const useAnalytics = () => {
     }
 
     if (periodType.value === 'year' && periodValue.value) {
-      const year = periodValue.value;
+      const year = periodValue.value.substring(0, 4);
       const monthlyMap = {};
       for (let m = 1; m <= 12; m++) monthlyMap[String(m).padStart(2, '0')] = 0;
       drilldownEntries.value.forEach(e => {

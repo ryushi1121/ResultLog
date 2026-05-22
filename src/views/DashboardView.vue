@@ -29,16 +29,12 @@
             v-model="selectedMonthStr"
             class="period-input"
           />
-          <div v-else class="year-input-wrapper">
-            <input 
-              type="number" 
-              v-model="selectedYearStr" 
-              class="period-input year-input"
-              min="2000" 
-              max="2100" 
-            />
-            <span class="year-label">年</span>
-          </div>
+          <input
+            v-else
+            type="month"
+            v-model="selectedYearStr"
+            class="period-input"
+          />
         </div>
       </div>
     </div>
@@ -128,10 +124,11 @@ const selectedMonthStr = computed({
 });
 
 const selectedYearStr = computed({
-  get: () => currentDate.value.getFullYear(),
+  get: () => `${currentDate.value.getFullYear()}-01`,
   set: (val) => {
     if (val) {
-      currentDate.value = new Date(val, 0, 1);
+      const [y] = val.split('-');
+      currentDate.value = new Date(parseInt(y), 0, 1);
     }
   }
 });
@@ -188,7 +185,9 @@ const currentPeriodStats = computed(() => {
 });
 
 const onPeriodChange = () => {
-  // ローカルでフィルタされるため再取得不要
+  if (viewMode.value === 'month') {
+    currentDate.value = new Date();
+  }
 };
 
 // 各ページへ渡す期間クエリ
@@ -233,7 +232,6 @@ onMounted(() => {
 }
 
 .dashboard-view {
-  padding: 1rem;
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -250,19 +248,6 @@ onMounted(() => {
     justify-content: space-between;
     align-items: flex-end;
   }
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-color, #ffffff);
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  color: var(--text-sub);
-  font-size: 0.95rem;
-  margin: 0;
 }
 
 .dashboard-controls {
@@ -324,22 +309,6 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.year-input-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.year-input {
-  width: 90px;
-  padding-right: 0.25rem;
-  text-align: center;
-}
-
-.year-label {
-  color: var(--text-color, #ffffff);
-  padding-right: 1rem;
-  font-weight: 600;
-}
 
 .summary-cards {
   display: grid;

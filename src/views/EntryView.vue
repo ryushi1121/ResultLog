@@ -22,28 +22,17 @@ const isEdit = computed(() => !!route.params.id);
 
 <style scoped>
 .entry-view {
-  padding: 1rem;
   animation: fadeIn 0.3s ease-out;
 }
 
 .page-header {
-  margin-bottom: 2rem;
   text-align: center;
 }
 
 .page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-color, #ffffff);
-  margin-bottom: 0.5rem;
   background: linear-gradient(to right, #00d4ff, #7c3aed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.page-subtitle {
-  color: var(--text-sub);
-  font-size: 0.95rem;
 }
 
 .entry-content {

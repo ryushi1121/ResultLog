@@ -7,19 +7,18 @@
         <button :class="{ active: filters.periodType === 'year' }" @click="setPeriod('year')">年別</button>
         <button :class="{ active: filters.periodType === 'month' }" @click="setPeriod('month')">月別</button>
       </div>
-      <input
-        v-if="filters.periodType === 'month'"
-        type="month"
-        v-model="filters.periodValue"
-        class="period-input"
-      />
-      <select
-        v-else-if="filters.periodType === 'year'"
-        v-model="filters.periodValue"
-        class="period-input"
-      >
-        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}年</option>
-      </select>
+      <div class="period-inputs" v-if="filters.periodType !== 'all'">
+        <input
+          v-if="filters.periodType === 'month'"
+          type="month"
+          v-model="filters.periodValue"
+        />
+        <input
+          v-if="filters.periodType === 'year'"
+          type="month"
+          v-model="filters.periodValue"
+        />
+      </div>
     </div>
 
     <!-- 店舗行 -->
@@ -88,7 +87,8 @@ const setPeriod = (type) => {
   if (type === 'month') {
     filters.periodValue = getMonthString(new Date());
   } else if (type === 'year') {
-    filters.periodValue = availableYears.value[0] || new Date().getFullYear().toString();
+    const y = availableYears.value[0] || String(new Date().getFullYear());
+    filters.periodValue = `${y}-01`;
   } else {
     filters.periodValue = null;
   }
@@ -116,7 +116,11 @@ defineExpose({
   },
   setPeriod(type, value) {
     filters.periodType = type;
-    filters.periodValue = value;
+    if (type === 'year' && value && !value.includes('-')) {
+      filters.periodValue = `${value}-01`;
+    } else {
+      filters.periodValue = value;
+    }
   }
 });
 </script>
@@ -149,7 +153,7 @@ defineExpose({
 }
 
 .period-tabs button {
-  padding: 7px 16px;
+  padding: 8px 16px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
   background: transparent;
@@ -170,9 +174,9 @@ defineExpose({
   font-weight: 600;
 }
 
-/* 期間値 input / select */
-.period-input {
-  padding: 7px 12px;
+/* 期間値 input */
+.period-inputs input {
+  padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
   background: var(--bg-input);
@@ -182,16 +186,11 @@ defineExpose({
   font-family: inherit;
 }
 
-.period-input:focus {
+.period-inputs input:focus {
   border-color: var(--accent-primary);
 }
 
-.period-input option {
-  background: var(--bg-input);
-  color: var(--text-main);
-}
-
-.period-input[type="month"]::-webkit-calendar-picker-indicator {
+.period-inputs input[type="month"]::-webkit-calendar-picker-indicator {
   filter: var(--picker-filter);
   cursor: pointer;
   opacity: 0.8;

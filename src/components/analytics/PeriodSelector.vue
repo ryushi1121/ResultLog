@@ -22,14 +22,11 @@
           type="month"
           v-model="periodValue"
         >
-        <select
+        <input
           v-if="periodType === 'year'"
+          type="month"
           v-model="periodValue"
         >
-          <option v-for="year in availableYears" :key="year" :value="year">
-            {{ year }}年
-          </option>
-        </select>
       </div>
     </div>
 
@@ -83,7 +80,7 @@ const setPeriod = (type) => {
   if (type === 'month') {
     periodValue.value = new Date().toISOString().substring(0, 7);
   } else if (type === 'year') {
-    periodValue.value = availableYears.value[0];
+    periodValue.value = `${availableYears.value[0]}-01`;
   } else {
     periodValue.value = null;
   }
@@ -93,7 +90,7 @@ onMounted(() => {
   if (periodType.value === 'month' && !periodValue.value) {
     periodValue.value = new Date().toISOString().substring(0, 7);
   } else if (periodType.value === 'year' && !periodValue.value) {
-    periodValue.value = availableYears.value[0];
+    periodValue.value = `${availableYears.value[0]}-01`;
   }
 });
 </script>
