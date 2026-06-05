@@ -12,9 +12,19 @@ export const useEntries = () => {
   const loadEntries = async (timeMin = null, timeMax = null) => {
     isLoading.value = true;
     error.value = null;
+    const prevEntries = entries.value.slice(); // 楽観的更新済みエントリを保持
     entries.value = []; // Clear old data to prevent cross-account leak
     try {
       const data = await fetchApi(timeMin, timeMax);
+      // 登録直後で検索インデックスに乗っていないエントリをマージして復元する
+      if (prevEntries.length > 0) {
+        const fetchedIds = new Set(data.map(e => e.id));
+        const missing = prevEntries.filter(e => e.id && !fetchedIds.has(e.id));
+        if (missing.length > 0) {
+          data.push(...missing);
+          data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+      }
       entries.value = data;
       isLoaded.value = true;
     } catch (err) {
