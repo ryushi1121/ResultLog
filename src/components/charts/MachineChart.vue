@@ -4,9 +4,14 @@
       <h3>機種別 稼働割合<span v-if="showOthers" class="others-badge">その他</span></h3>
       <div class="header-actions">
         <button v-if="showOthers" class="clear-btn" @click="showOthers = false">← 戻る</button>
-        <button v-if="selectedMachine" class="clear-btn" @click="setSelectedMachine(selectedMachine)">
-          {{ selectedMachine }} ✕
-        </button>
+        <template v-if="selectedMachine">
+          <span v-if="machineTrendStats" class="win-rate-chip">
+            勝率 {{ machineTrendStats.winRate.toFixed(1) }}%
+          </span>
+          <button class="clear-btn" @click="setSelectedMachine(selectedMachine)">
+            {{ selectedMachine }} ✕
+          </button>
+        </template>
       </div>
     </div>
     <div class="chart-wrapper">
@@ -107,6 +112,15 @@ const chartOptions = computed(() => ({
     else { setSelectedMachine(name); }
   },
   plugins: {
+    tooltip: {
+      callbacks: {
+        label: (ctx) => {
+          const stat = sortedData.value[ctx.dataIndex];
+          if (!stat || stat.winRate === undefined) return ` ${ctx.parsed}回`;
+          return ` ${stat.count}回（勝率 ${stat.winRate.toFixed(1)}%）`;
+        }
+      }
+    },
     legend: {
       position: 'right',
       labels: { color: cc.value.text },
@@ -253,6 +267,15 @@ const trendOptions = computed(() => {
 }
 .clear-btn:hover {
   background: rgba(0, 212, 255, 0.2);
+}
+.win-rate-chip {
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  white-space: nowrap;
 }
 .chart-wrapper {
   position: relative;

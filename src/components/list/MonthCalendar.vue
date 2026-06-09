@@ -34,6 +34,9 @@
     <div class="cal-summary">
       <span class="cal-summary-label">月計</span>
       <span class="cal-summary-profit" :class="profitClass(monthTotal)">{{ formatProfit(monthTotal) }}</span>
+      <span v-if="monthDayWinRate !== null" class="cal-summary-winrate" :class="monthDayWinRate >= 50 ? 'winrate-good' : 'winrate-bad'">
+        日別勝率 {{ monthDayWinRate }}%
+      </span>
       <span class="cal-summary-sub">{{ props.entries.length }}件 / 投資 {{ formatCurrency(monthInv) }} 回収 {{ formatCurrency(monthCol) }}</span>
     </div>
 
@@ -111,6 +114,13 @@ const dayTotal = (day) => (entryMap.value[day] || []).reduce((s, e) => s + e.pro
 const monthTotal = computed(() => props.entries.reduce((s, e) => s + e.profit, 0));
 const monthInv   = computed(() => props.entries.reduce((s, e) => s + e.investment, 0));
 const monthCol   = computed(() => props.entries.reduce((s, e) => s + e.collection, 0));
+
+const monthDayWinRate = computed(() => {
+  const days = Object.keys(entryMap.value);
+  if (days.length === 0) return null;
+  const winDays = days.filter(d => dayTotal(Number(d)) > 0).length;
+  return Math.round((winDays / days.length) * 100);
+});
 
 const selectedDayDow = computed(() => {
   if (!selectedDay.value) return '';
@@ -291,6 +301,22 @@ const editEntry = (entry) => {
   font-size: 0.95rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+.cal-summary-winrate {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.winrate-good {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.winrate-bad {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 .cal-summary-sub {
   font-size: 0.75rem;

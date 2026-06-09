@@ -7,9 +7,9 @@
 
     <div class="stats-grid">
       <div class="stat-item">
-        <div class="stat-label">勝率</div>
-        <div class="stat-value" :class="{ 'good': winRate >= 50 }">
-          {{ isNaN(winRate) ? '-' : winRate + '%' }}
+        <div class="stat-label">日別勝率</div>
+        <div class="stat-value" :class="{ 'good': dayWinRate >= 50 }">
+          {{ isNaN(dayWinRate) ? '-' : dayWinRate + '%' }}
         </div>
       </div>
       
@@ -61,10 +61,16 @@ const activeDays = computed(() => {
   return dates.size;
 });
 
-const winRate = computed(() => {
-  if (props.entries.length === 0) return NaN;
-  const wins = props.entries.filter(e => e.profit > 0).length;
-  return Math.round((wins / props.entries.length) * 100);
+const dayWinRate = computed(() => {
+  const dayMap = {};
+  props.entries.forEach(e => {
+    if (!dayMap[e.date]) dayMap[e.date] = 0;
+    dayMap[e.date] += e.profit;
+  });
+  const days = Object.values(dayMap);
+  if (days.length === 0) return NaN;
+  const winDays = days.filter(p => p > 0).length;
+  return Math.round((winDays / days.length) * 100);
 });
 
 const averageProfit = computed(() => {
