@@ -423,6 +423,7 @@ const confirmDelete = (entry) => {
 .entry-memo {
   color: var(--text-faded);
   margin-left: 4px;
+  white-space: pre-wrap;
 }
 
 .entry-numbers {
