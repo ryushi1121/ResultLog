@@ -111,7 +111,7 @@
       <div class="card settings-card">
         <h3>アプリ情報</h3>
         <ul class="app-info-list">
-          <li><strong>バージョン:</strong> 1.0.0</li>
+          <li><strong>バージョン:</strong> 1.0.1</li>
           <li><strong>開発環境:</strong> Vue 3 + Vite</li>
           <li><strong>PWA:</strong> 対応済み</li>
         </ul>
