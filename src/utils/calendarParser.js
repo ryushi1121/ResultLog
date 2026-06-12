@@ -35,7 +35,11 @@ export const parseEvent = (calendarEvent) => {
 
   const description = calendarEvent.description || '';
   const lines = description.split('\n').map(line => line.trim());
-  
+
+  // メモは複数行になりうるため、メモ行の位置を先に特定する
+  const memoLineIdx = lines.findIndex(l => l.startsWith('メモ：'));
+  const kvLines = memoLineIdx >= 0 ? lines.slice(0, memoLineIdx) : lines;
+
   const entry = {
     id: calendarEvent.id,
     date: dateStr,
@@ -51,7 +55,7 @@ export const parseEvent = (calendarEvent) => {
     dayOfWeek: getDayOfWeek(dateStr)
   };
 
-  lines.forEach(line => {
+  kvLines.forEach(line => {
     const colonIndex = line.indexOf('：');
     if (colonIndex > -1) {
       const key = line.substring(0, colonIndex).trim();
@@ -91,12 +95,16 @@ export const parseEvent = (calendarEvent) => {
         case '台番号':
           entry.slotNumber = value;
           break;
-        case 'メモ':
-          entry.memo = value;
-          break;
       }
     }
   });
+
+  // メモ行以降を全て結合して改行を復元する
+  if (memoLineIdx >= 0) {
+    const firstLine = lines[memoLineIdx].substring('メモ：'.length);
+    const restLines = lines.slice(memoLineIdx + 1);
+    entry.memo = [firstLine, ...restLines].join('\n').trimEnd();
+  }
 
   entry.profit = entry.collection - entry.investment;
 
