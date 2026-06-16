@@ -10,6 +10,7 @@ export const useEntries = () => {
   const { fetchEntries: fetchApi, createEntry: createApi, updateEntry: updateApi, deleteEntry: deleteApi } = useCalendar();
 
   const loadEntries = async (timeMin = null, timeMax = null) => {
+    if (isLoading.value) return; // 重複実行防止：同時に複数走ると prevEntries スナップショットが空になり楽観的更新データが消える
     isLoading.value = true;
     error.value = null;
     const prevEntries = entries.value.slice(); // 楽観的更新済みエントリを保持
