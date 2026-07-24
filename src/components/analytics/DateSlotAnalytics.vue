@@ -15,7 +15,11 @@
           v-for="s in slotMatchStats"
           :key="s.label"
           class="match-card"
-          :class="s.label === '一致' ? 'match-card--match' : 'match-card--nomatch'"
+          :class="[
+            s.label === '一致' ? 'match-card--match' : 'match-card--nomatch',
+            { 'match-card--selected': isSelectedMatch(s.label), 'match-card--clickable': s.count > 0 }
+          ]"
+          @click="toggleMatch(s)"
         >
           <div class="match-card-title">{{ s.label }}</div>
           <div class="match-card-count">{{ s.count }}回</div>
@@ -33,11 +37,18 @@
         </div>
       </div>
     </div>
+
+    <AnalyticsBreakdownPanel
+      v-if="selectedData"
+      :title="selectedData.title"
+      :entries="selectedData.entries"
+      @close="selected = null"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -53,11 +64,37 @@ import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { useTheme } from '@/composables/useTheme';
 import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
+import AnalyticsBreakdownPanel from './AnalyticsBreakdownPanel.vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Annotation);
 
 const { dateSuffixStats, slotMatchStats } = useAnalytics();
 const { theme } = useTheme();
+
+// ---- タップ内訳（末尾グラフ・一致不一致カードで1つだけ開く） ----
+const selected = ref(null); // { type: 'suffix'|'match', key: string }
+
+const selectedData = computed(() => {
+  if (!selected.value) return null;
+  if (selected.value.type === 'suffix') {
+    const s = dateSuffixStats.value.find(x => x.suffix === selected.value.key);
+    return s ? { title: `末尾${s.suffix}`, entries: s.entries } : null;
+  }
+  const s = slotMatchStats.value.find(x => x.label === selected.value.key);
+  return s ? { title: s.label, entries: s.entries } : null;
+});
+
+const isSelectedSuffix = (suffix) => selected.value?.type === 'suffix' && selected.value.key === suffix;
+const isSelectedMatch = (label) => selected.value?.type === 'match' && selected.value.key === label;
+
+const toggleSuffix = (s) => {
+  if (!s || s.count === 0) return;
+  selected.value = isSelectedSuffix(s.suffix) ? null : { type: 'suffix', key: s.suffix };
+};
+const toggleMatch = (s) => {
+  if (!s || s.count === 0) return;
+  selected.value = isSelectedMatch(s.label) ? null : { type: 'match', key: s.label };
+};
 
 const cc = computed(() => {
   const isLight = theme.value === 'light';
@@ -79,7 +116,7 @@ const chartData = computed(() => ({
       borderColor: dateSuffixStats.value.map(s =>
         s.avgProfit >= 0 ? '#22c55e' : '#ef4444'
       ),
-      borderWidth: 1
+      borderWidth: dateSuffixStats.value.map(s => isSelectedSuffix(s.suffix) ? 3 : 1)
     }
   ]
 }));
@@ -88,6 +125,10 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
+  onClick: (_event, elements) => {
+    if (elements.length === 0) return;
+    toggleSuffix(dateSuffixStats.value[elements[0].index]);
+  },
   plugins: {
     legend: { labels: { color: cc.value.textSub, font: { size: 12 } } },
     tooltip: {
@@ -162,6 +203,17 @@ const rateClass = (val) => val >= 50 ? 'text-success' : 'text-danger';
 }
 .match-card--match {
   border-color: rgba(var(--accent-primary-rgb), 0.3);
+}
+.match-card--clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.match-card--clickable:hover {
+  background: var(--surface-hover);
+}
+.match-card--selected {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
 }
 .match-card-title {
   font-size: 0.9rem;

@@ -8,6 +8,8 @@
         v-for="s in dayZoromeStats"
         :key="s.day"
         class="zorome-day-card"
+        :class="{ 'zorome-day-card--selected': selectedDay === s.day, 'zorome-day-card--clickable': s.count > 0 }"
+        @click="toggleDay(s)"
       >
         <div class="zd-title">{{ s.day }}日</div>
         <div class="zd-count">{{ s.count }}回</div>
@@ -25,6 +27,13 @@
         </div>
       </div>
     </div>
+
+    <AnalyticsBreakdownPanel
+      v-if="selectedDayData"
+      :title="`${selectedDayData.day}日`"
+      :entries="selectedDayData.entries"
+      @close="selectedDay = null"
+    />
 
     <!-- 月日ゾロ目 -->
     <h3 class="section-title-mt">月日ゾロ目</h3>
@@ -56,11 +65,18 @@
       </div>
     </div>
 
+    <AnalyticsBreakdownPanel
+      v-if="selectedMonthDayData"
+      :title="selectedMonthDayData.label"
+      :entries="selectedMonthDayData.entries"
+      @close="selectedMonthDay = null"
+    />
+
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -74,11 +90,33 @@ import Annotation from 'chartjs-plugin-annotation';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { useTheme } from '@/composables/useTheme';
 import { zeroLineAnnotationSingle } from '@/utils/chartUtils';
+import AnalyticsBreakdownPanel from './AnalyticsBreakdownPanel.vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Annotation);
 
 const { dayZoromeStats, monthDayZoromeStats } = useAnalytics();
 const { theme } = useTheme();
+
+// ---- タップ内訳 ----
+const selectedDay = ref(null); // '11' | '22' | null
+const selectedDayData = computed(() => {
+  if (!selectedDay.value) return null;
+  return dayZoromeStats.value.find(s => s.day === selectedDay.value) || null;
+});
+const toggleDay = (s) => {
+  if (!s || s.count === 0) return;
+  selectedDay.value = selectedDay.value === s.day ? null : s.day;
+};
+
+const selectedMonthDay = ref(null); // key | null
+const selectedMonthDayData = computed(() => {
+  if (!selectedMonthDay.value) return null;
+  return monthDayZoromeStats.value.find(s => s.key === selectedMonthDay.value) || null;
+});
+const toggleMonthDay = (s) => {
+  if (!s || s.count === 0) return;
+  selectedMonthDay.value = selectedMonthDay.value === s.key ? null : s.key;
+};
 
 const cc = computed(() => {
   const isLight = theme.value === 'light';
@@ -114,7 +152,7 @@ const chartData = computed(() => ({
       borderColor: monthDayZoromeStats.value.map(s =>
         s.avgProfit >= 0 ? '#22c55e' : '#ef4444'
       ),
-      borderWidth: 1
+      borderWidth: monthDayZoromeStats.value.map(s => selectedMonthDay.value === s.key ? 3 : 1)
     }
   ]
 }));
@@ -123,6 +161,10 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
+  onClick: (_event, elements) => {
+    if (elements.length === 0) return;
+    toggleMonthDay(monthDayZoromeStats.value[elements[0].index]);
+  },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -197,6 +239,17 @@ h3 {
   border-radius: 10px;
   background: var(--overlay-1);
   border: 1px solid rgba(var(--accent-primary-rgb), 0.2);
+}
+.zorome-day-card--clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.zorome-day-card--clickable:hover {
+  background: var(--surface-hover);
+}
+.zorome-day-card--selected {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
 }
 .zd-title {
   font-size: 1rem;

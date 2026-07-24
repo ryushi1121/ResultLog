@@ -121,7 +121,7 @@ export const useAnalytics = () => {
   const dateSuffixStats = computed(() => {
     const groups = {};
     for (let i = 0; i <= 9; i++) {
-      groups[String(i)] = { suffix: String(i), count: 0, winCount: 0, profit: 0 };
+      groups[String(i)] = { suffix: String(i), count: 0, winCount: 0, profit: 0, entries: [] };
     }
     drilldownEntries.value.forEach(e => {
       if (!e.date) return;
@@ -130,6 +130,7 @@ export const useAnalytics = () => {
         groups[suffix].count++;
         groups[suffix].profit += e.profit || 0;
         if (e.profit > 0) groups[suffix].winCount++;
+        groups[suffix].entries.push(e);
       }
     });
     return Object.values(groups).map(g => ({
@@ -143,7 +144,7 @@ export const useAnalytics = () => {
   const dayZoromeStats = computed(() => {
     const targets = ['11', '22'];
     const groups = {};
-    targets.forEach(d => { groups[d] = { day: d, count: 0, winCount: 0, profit: 0 }; });
+    targets.forEach(d => { groups[d] = { day: d, count: 0, winCount: 0, profit: 0, entries: [] }; });
     drilldownEntries.value.forEach(e => {
       if (!e.date) return;
       const day = e.date.slice(-2);
@@ -151,6 +152,7 @@ export const useAnalytics = () => {
         groups[day].count++;
         groups[day].profit += e.profit || 0;
         if (e.profit > 0) groups[day].winCount++;
+        groups[day].entries.push(e);
       }
     });
     return targets.map(d => ({
@@ -180,7 +182,7 @@ export const useAnalytics = () => {
   const monthDayZoromeStats = computed(() => {
     const groups = {};
     MONTH_DAY_ZOROME.forEach(({ key, label }) => {
-      groups[key] = { key, label, count: 0, winCount: 0, profit: 0 };
+      groups[key] = { key, label, count: 0, winCount: 0, profit: 0, entries: [] };
     });
     drilldownEntries.value.forEach(e => {
       if (!e.date) return;
@@ -189,6 +191,7 @@ export const useAnalytics = () => {
         groups[md].count++;
         groups[md].profit += e.profit || 0;
         if (e.profit > 0) groups[md].winCount++;
+        groups[md].entries.push(e);
       }
     });
     return MONTH_DAY_ZOROME.map(({ key }) => ({
@@ -200,8 +203,8 @@ export const useAnalytics = () => {
 
   // 日付末尾と台番号末尾の一致・不一致の比較（drilldownEntries ベース）
   const slotMatchStats = computed(() => {
-    const match =   { label: '一致', count: 0, winCount: 0, profit: 0 };
-    const noMatch = { label: '不一致', count: 0, winCount: 0, profit: 0 };
+    const match =   { label: '一致', count: 0, winCount: 0, profit: 0, entries: [] };
+    const noMatch = { label: '不一致', count: 0, winCount: 0, profit: 0, entries: [] };
     drilldownEntries.value.forEach(e => {
       if (!e.date || !e.slotNumber) return;
       const slotSuffix = String(e.slotNumber).trim().slice(-1);
@@ -210,6 +213,7 @@ export const useAnalytics = () => {
       group.count++;
       group.profit += e.profit || 0;
       if (e.profit > 0) group.winCount++;
+      group.entries.push(e);
     });
     return [match, noMatch].map(g => ({
       ...g,
