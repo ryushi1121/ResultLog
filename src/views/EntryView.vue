@@ -12,12 +12,21 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import EntryForm from '../components/entry/EntryForm.vue';
+import { useEntries } from '../composables/useEntries';
 
 const route = useRoute();
 const isEdit = computed(() => !!route.params.id);
+
+const { isLoaded, loadEntries } = useEntries();
+
+// この画面に直接来る（リロード・PWAショートカット・内訳パネルからの遷移）と
+// entries が空のままになり、編集フォームが埋まらず店舗サジェストも効かないため
+onMounted(() => {
+  if (!isLoaded.value) loadEntries();
+});
 </script>
 
 <style scoped>

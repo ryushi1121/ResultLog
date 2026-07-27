@@ -1,6 +1,19 @@
 <template>
   <div class="entry-form-container">
-    <form @submit.prevent="submitForm" class="entry-form">
+    <!-- 編集対象の取得待ち -->
+    <div v-if="isEditMode && !isFormReady && !isEntryMissing" class="form-state">
+      <div class="spinner"></div>
+      <p>記録を読み込み中...</p>
+    </div>
+
+    <!-- 取得できたが対象が存在しない -->
+    <div v-else-if="isEntryMissing" class="form-state">
+      <p class="state-title">この記録は見つかりませんでした</p>
+      <p class="state-sub">すでに削除されているか、URLが正しくない可能性があります。</p>
+      <router-link to="/list" class="btn btn-primary">収支一覧へ戻る</router-link>
+    </div>
+
+    <form v-else @submit.prevent="submitForm" class="entry-form">
       <div class="form-group">
         <label for="date" class="form-label">日付</label>
         <input 
@@ -192,7 +205,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const { entries, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
+const { entries, isLoaded, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
 const { calculateYen } = useStoreSettings();
 
 const emptyForm = () => ({
@@ -233,27 +246,44 @@ const formattedProfit = computed(() => formatProfit(profit.value));
 
 const isEditMode = computed(() => !!props.entryId);
 
+// 編集対象を実際に読み込めたか。false のままフォームを出すと
+// 空の内容で既存データを上書きしてしまうため、入力・送信をブロックする
+const isFormReady = ref(false);
+
+// 読み込みは終わったのに対象が見つからない（削除済み・URL 直打ちミス）
+const isEntryMissing = computed(() => isEditMode.value && isLoaded.value && !isFormReady.value);
+
 const initForm = () => {
   if (props.entryId) {
     const existing = entries.value.find(e => e.id === props.entryId);
-    if (existing) {
-      formData.value = {
-        ...existing,
-        investmentCash: existing.investmentCash !== undefined ? existing.investmentCash : existing.investment || '',
-        investmentMedal: existing.investmentMedal || '',
-        collectionCash: existing.collectionCash !== undefined ? existing.collectionCash : existing.collection || '',
-        collectionMedal: existing.collectionMedal || ''
-      };
+    if (!existing) {
+      // まだ取得できていない可能性があるので空フォームで埋めない
+      isFormReady.value = false;
+      return;
     }
+    formData.value = {
+      ...existing,
+      investmentCash: existing.investmentCash !== undefined ? existing.investmentCash : existing.investment || '',
+      investmentMedal: existing.investmentMedal || '',
+      collectionCash: existing.collectionCash !== undefined ? existing.collectionCash : existing.collection || '',
+      collectionMedal: existing.collectionMedal || ''
+    };
   } else {
     formData.value = emptyForm();
   }
+  isFormReady.value = true;
 };
 
 onMounted(initForm);
 
 // /entry/:id → /entry への遷移でコンポーネントが再利用されるため watch で再初期化
 watch(() => props.entryId, initForm);
+
+// 取得完了で対象が現れたら一度だけ流し込む。
+// 初期化済みなら編集中の入力を消さないようスキップする
+watch(entries, () => {
+  if (props.entryId && !isFormReady.value) initForm();
+});
 
 const handleDelete = async () => {
   const entry = entries.value.find(e => e.id === props.entryId);
@@ -268,6 +298,8 @@ const handleDelete = async () => {
 };
 
 const submitForm = async () => {
+  // 読み込み前の空フォームで既存データを潰さないための保険
+  if (isEditMode.value && !isFormReady.value) return;
   try {
     const entryData = {
       ...formData.value,
@@ -308,6 +340,46 @@ const submitForm = async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.form-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 200px;
+  text-align: center;
+  color: var(--text-sub);
+}
+
+.form-state .state-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.form-state .state-sub {
+  font-size: 0.875rem;
+}
+
+.form-state .btn {
+  width: auto;
+  padding: 0.65rem 1.5rem;
+  text-decoration: none;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border-subtle);
+  border-radius: 50%;
+  border-top-color: var(--primary-color, #00d4ff);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .form-group {
