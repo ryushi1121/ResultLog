@@ -16,7 +16,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-version">v1.0.0</div>
+      <div class="sidebar-version">v{{ appVersion }}</div>
     </div>
   </aside>
 
@@ -51,7 +51,7 @@ export default {
       }
     }
 
-    return { navItems, handleNavClick }
+    return { navItems, handleNavClick, appVersion: __APP_VERSION__ }
   }
 }
 </script>
