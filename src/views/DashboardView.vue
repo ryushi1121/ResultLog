@@ -70,6 +70,14 @@
               <div class="invest-label">総回収</div>
               <div class="invest-amount collection">¥{{ formatCurrency(currentPeriodStats.collection) }}</div>
             </div>
+            <div class="invest-divider"></div>
+            <div class="invest-col">
+              <div
+                class="invest-label"
+                title="回収現金 − 投資現金。台移動で持ち込んだメダルは投資・回収で相殺されるため、エントリの分け方や交換率設定の影響を受けません"
+              >現金収支 <i class="fa-solid fa-circle-info label-info"></i></div>
+              <div class="invest-amount" :class="cashProfitClass">{{ formattedCashProfit }}</div>
+            </div>
           </div>
         </div>
 
@@ -98,6 +106,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useEntries } from '../composables/useEntries';
 import { formatCurrency } from '../utils/formatters';
+import { cashTotals } from '../utils/entryUtils';
 import SummaryCard from '../components/dashboard/SummaryCard.vue';
 import QuickStats from '../components/dashboard/QuickStats.vue';
 import RecentHistory from '../components/dashboard/RecentHistory.vue';
@@ -174,14 +183,29 @@ const currentPeriodEntries = computed(() => {
 // 表示期間の合計を計算
 const currentPeriodStats = computed(() => {
   const stats = { investment: 0, collection: 0, profit: 0 };
-  
+
   currentPeriodEntries.value.forEach(e => {
     stats.investment += e.investment;
     stats.collection += e.collection;
     stats.profit += e.profit;
   });
-  
+
+  stats.cashProfit = cashTotals(currentPeriodEntries.value).profit;
   return stats;
+});
+
+// 同じカード内の 総投資 / 総回収 と表記を揃えるため ¥ を付ける
+const formattedCashProfit = computed(() => {
+  const p = currentPeriodStats.value.cashProfit;
+  const sign = p > 0 ? '+' : p < 0 ? '-' : '';
+  return `${sign}¥${formatCurrency(Math.abs(p))}`;
+});
+
+const cashProfitClass = computed(() => {
+  const p = currentPeriodStats.value.cashProfit;
+  if (p > 0) return 'collection';
+  if (p < 0) return 'investment';
+  return '';
 });
 
 const onPeriodChange = () => {
@@ -317,6 +341,11 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
+/* grid アイテムの既定 min-width:auto だと中身の幅まで広がってしまうため */
+.summary-cards > * {
+  min-width: 0;
+}
+
 @media (max-width: 640px) {
   .summary-cards {
     grid-template-columns: 1fr;
@@ -388,6 +417,12 @@ onMounted(() => {
   color: var(--text-faded);
 }
 
+.label-info {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  cursor: help;
+}
+
 .invest-amount {
   font-family: 'Inter', sans-serif;
   font-size: 1.6rem;
@@ -445,6 +480,32 @@ onMounted(() => {
 @media (max-width: 768px) {
   .dashboard-view {
     padding: 0.5rem;
+  }
+}
+
+/* 投資/回収カードのモバイル調整。
+   .invest-* の基本定義より後ろに置かないと上書きされないので位置を変えないこと */
+@media (max-width: 640px) {
+  /* 現金収支を足して3カラムになったぶん詰める。
+     minmax(0,1fr) にしないとカードが中身の幅まで広がって横スクロールが出る */
+  .invest-body {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .invest-divider {
+    display: none;
+  }
+
+  .invest-label {
+    font-size: 0.7rem;
+  }
+
+  /* 桁が増えてもカードを押し広げずに折り返させる */
+  .invest-amount {
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
   }
 }
 </style>

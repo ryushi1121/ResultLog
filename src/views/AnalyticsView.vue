@@ -13,6 +13,13 @@
       <span class="summary-amount" :class="profitClass">
         {{ formattedProfit }}円
       </span>
+      <span
+        class="summary-cash"
+        :class="cashProfitClass"
+        title="回収現金 − 投資現金。台移動で持ち込んだメダルは投資・回収で相殺されるため、エントリの分け方や交換率設定の影響を受けません"
+      >
+        現金 {{ formattedCashProfit }}円
+      </span>
       <span class="summary-count">{{ summaryStats.count }}回</span>
     </div>
 
@@ -69,6 +76,14 @@ const profitClass = computed(() => {
   if (p < 0) return 'text-danger';
   return '';
 });
+
+const formattedCashProfit = computed(() => formatProfit(summaryStats.value.cashProfit));
+const cashProfitClass = computed(() => {
+  const p = summaryStats.value.cashProfit;
+  if (p > 0) return 'text-success';
+  if (p < 0) return 'text-danger';
+  return '';
+});
 </script>
 
 <style scoped>
@@ -88,6 +103,16 @@ const profitClass = computed(() => {
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-main);
+}
+.summary-cash {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--overlay-1);
+  white-space: nowrap;
+  cursor: help;
 }
 .summary-count {
   color: var(--text-faded);

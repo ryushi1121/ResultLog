@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue';
 import { useEntries } from './useEntries';
+import { cashOf } from '../utils/entryUtils';
 
 // Shared state so it persists across components
 const periodType = ref('month');
@@ -37,6 +38,8 @@ export const useAnalytics = () => {
     let totalInvestment = 0;
     let totalCollection = 0;
     let totalProfit = 0;
+    let cashInvestment = 0;
+    let cashCollection = 0;
     let winCount = 0;
     let maxWin = 0;
     let maxLoss = 0;
@@ -45,6 +48,10 @@ export const useAnalytics = () => {
       totalInvestment += e.investment || 0;
       totalCollection += e.collection || 0;
       totalProfit += e.profit || 0;
+      // 現金だけを集計する。台移動で持ち込んだメダルは投資・回収の両方に
+      // 同額で乗って打ち消し合うため、エントリの切り方に影響されない
+      cashInvestment += cashOf(e, 'investment');
+      cashCollection += cashOf(e, 'collection');
       if (e.profit > 0) winCount++;
       if (e.profit > maxWin) maxWin = e.profit;
       if (e.profit < maxLoss) maxLoss = e.profit;
@@ -53,7 +60,18 @@ export const useAnalytics = () => {
     const count = drilldownEntries.value.length;
     const winRate = count > 0 ? (winCount / count) * 100 : 0;
 
-    return { count, totalInvestment, totalCollection, totalProfit, winRate, maxWin, maxLoss };
+    return {
+      count,
+      totalInvestment,
+      totalCollection,
+      totalProfit,
+      cashInvestment,
+      cashCollection,
+      cashProfit: cashCollection - cashInvestment,
+      winRate,
+      maxWin,
+      maxLoss
+    };
   });
 
   const _groupAndAggregate = (keySelector, baseEntries) => {
