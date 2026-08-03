@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import { useEntries } from './useEntries';
 import { cashOf } from '../utils/entryUtils';
+import { aggregateWeekdayStats } from '../utils/analyticsUtils';
 
 // Shared state so it persists across components
 const periodType = ref('month');
@@ -129,11 +130,7 @@ export const useAnalytics = () => {
     return _groupAndAggregate(e => e.machine, base);
   });
 
-  const weekdayStats = computed(() => {
-    const stats = _groupAndAggregate(e => e.dayOfWeek, drilldownEntries.value);
-    const weekOrder = { '月': 1, '火': 2, '水': 3, '木': 4, '金': 5, '土': 6, '日': 7 };
-    return stats.sort((a, b) => (weekOrder[a.name] || 99) - (weekOrder[b.name] || 99));
-  });
+  const weekdayStats = computed(() => aggregateWeekdayStats(drilldownEntries.value));
 
   // 日付末尾（0〜9）ごとの集計（drilldownEntries ベース）
   const dateSuffixStats = computed(() => {

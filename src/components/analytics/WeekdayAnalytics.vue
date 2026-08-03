@@ -6,7 +6,7 @@
         <thead>
           <tr>
             <th>曜日</th>
-            <th class="text-right">回数</th>
+            <th class="text-right">稼働日数</th>
             <th class="text-right">勝率</th>
             <th class="text-right">収支</th>
           </tr>
