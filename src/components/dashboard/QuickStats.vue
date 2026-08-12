@@ -38,7 +38,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { formatCurrency, formatProfit } from '../../utils/formatters';
+import { formatCurrency, formatProfit } from '@/utils/formatters';
 
 const props = defineProps({
   entries: {

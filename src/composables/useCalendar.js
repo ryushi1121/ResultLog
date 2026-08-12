@@ -1,5 +1,5 @@
 import { useAuth } from './useAuth';
-import { parseEvent, formatEvent } from '../utils/calendarParser';
+import { parseEvent, formatEvent } from '@/utils/calendarParser';
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 
@@ -24,8 +24,13 @@ export const useCalendar = () => {
     return response.json();
   };
 
-  // 401 時にサイレントリフレッシュしてリトライ、それでも失敗したらログアウト
-  const fetchWithRetry = async (url, options = {}) => {
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const MAX_RATE_LIMIT_RETRY = 3;
+
+  // 401 時にサイレントリフレッシュしてリトライ、それでも失敗したらログアウト。
+  // 429（レート制限）と 5xx は時間をおけば成功するので指数バックオフで再試行する
+  const fetchWithRetry = async (url, options = {}, attempt = 0) => {
     let response = await fetch(url, { ...options, headers: getHeaders() });
 
     if (response.status === 401) {
@@ -39,6 +44,11 @@ export const useCalendar = () => {
         }
         throw new Error('セッションの有効期限が切れました。再ログインしてください。');
       }
+    }
+
+    if ((response.status === 429 || response.status >= 500) && attempt < MAX_RATE_LIMIT_RETRY) {
+      await sleep(500 * 2 ** attempt);
+      return fetchWithRetry(url, options, attempt + 1);
     }
 
     return handleResponse(response);

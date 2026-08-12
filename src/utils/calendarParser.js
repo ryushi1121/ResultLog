@@ -1,4 +1,5 @@
-import { formatDateForAPI, getDayOfWeek } from './dateUtils';
+// node --test から直接 import するため拡張子まで書く（Vite は付いていても解決できる）
+import { formatDateForAPI, getDayOfWeek } from './dateUtils.js';
 
 const PREFIX = '【ResultLog】 ';
 
@@ -77,18 +78,20 @@ export const parseEvent = (calendarEvent) => {
       };
 
       switch (key) {
-        case '投資':
+        case '投資': {
           const inv = parseAmount(value);
           entry.investment = inv.total;
           entry.investmentCash = inv.cash;
           entry.investmentMedal = inv.medal;
           break;
-        case '回収':
+        }
+        case '回収': {
           const col = parseAmount(value);
           entry.collection = col.total;
           entry.collectionCash = col.cash;
           entry.collectionMedal = col.medal;
           break;
+        }
         case '機種':
           entry.machine = value;
           break;

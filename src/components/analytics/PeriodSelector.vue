@@ -56,8 +56,12 @@
 import { computed, onMounted } from 'vue';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { useEntries } from '@/composables/useEntries';
+import { getMonthString } from '@/utils/dateUtils';
 
 const { periodType, periodValue, selectedStore, availableStores, selectedMachine, availableMachines } = useAnalytics();
+
+// toISOString は UTC 基準で月初の朝に前月へずれるため、ローカル日付から組み立てる
+const currentMonth = () => getMonthString(new Date());
 
 // null ↔ '' の変換（select の v-model 用）
 const machineModel = computed({
@@ -78,7 +82,7 @@ const availableYears = computed(() => {
 const setPeriod = (type) => {
   periodType.value = type;
   if (type === 'month') {
-    periodValue.value = new Date().toISOString().substring(0, 7);
+    periodValue.value = currentMonth();
   } else if (type === 'year') {
     periodValue.value = `${availableYears.value[0]}-01`;
   } else {
@@ -88,7 +92,7 @@ const setPeriod = (type) => {
 
 onMounted(() => {
   if (periodType.value === 'month' && !periodValue.value) {
-    periodValue.value = new Date().toISOString().substring(0, 7);
+    periodValue.value = currentMonth();
   } else if (periodType.value === 'year' && !periodValue.value) {
     periodValue.value = `${availableYears.value[0]}-01`;
   }

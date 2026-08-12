@@ -34,20 +34,17 @@
   </header>
 </template>
 
-<script>
-import { useTheme } from '../../composables/useTheme';
-export default {
-  name: 'AppHeader',
-  props: {
-    user: { type: Object, default: null },
-    sidebarOpen: { type: Boolean, default: false }
-  },
-  emits: ['toggle-sidebar', 'logout'],
-  setup() {
-    const { theme, toggleTheme } = useTheme();
-    return { theme, toggleTheme };
-  }
-}
+<script setup>
+import { useTheme } from '@/composables/useTheme';
+
+defineProps({
+  user: { type: Object, default: null },
+  sidebarOpen: { type: Boolean, default: false }
+});
+
+defineEmits(['toggle-sidebar', 'logout']);
+
+const { theme, toggleTheme } = useTheme();
 </script>
 
 <style scoped>

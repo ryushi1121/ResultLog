@@ -1,10 +1,46 @@
 import { ref, computed } from 'vue';
 import { useCalendar } from './useCalendar';
+import { mapWithConcurrency } from '@/utils/concurrency';
 
 const entries = ref([]);
 const isLoading = ref(false);
 const error = ref(null);
 const isLoaded = ref(false);
+
+const CACHE_KEY = 'resultlog_entries_cache';
+
+// 取得済みデータのローカルキャッシュ。
+// 全件フェッチは件数に比例して待たされるので、前回の内容を先に表示して裏で更新する
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { email, entries: cached } = JSON.parse(raw);
+    // 別アカウントのデータが混ざらないよう、保存時と同じユーザーのときだけ使う
+    if (!Array.isArray(cached) || email !== localStorage.getItem('google_user_email')) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (list) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      email: localStorage.getItem('google_user_email'),
+      entries: list
+    }));
+  } catch {
+    // 容量超過などで書けなくても表示自体には影響しないので握りつぶす
+  }
+};
+
+// CSV取込のように短時間で何度も更新が走るケースがあるため、書き込みはまとめる
+let cacheTimer = null;
+const scheduleCacheWrite = () => {
+  clearTimeout(cacheTimer);
+  cacheTimer = setTimeout(() => writeCache(entries.value), 500);
+};
 
 export const useEntries = () => {
   const { fetchEntries: fetchApi, createEntry: createApi, updateEntry: updateApi, deleteEntry: deleteApi } = useCalendar();
@@ -14,7 +50,8 @@ export const useEntries = () => {
     isLoading.value = true;
     error.value = null;
     const prevEntries = entries.value.slice(); // 楽観的更新済みエントリを保持
-    entries.value = []; // Clear old data to prevent cross-account leak
+    // 初回はキャッシュを先に見せる。2回目以降（既に表示中）は一旦空にして別アカウントの残留を防ぐ
+    entries.value = entries.value.length === 0 ? (readCache() || []) : [];
     try {
       const data = await fetchApi(timeMin, timeMax);
       // 登録直後で検索インデックスに乗っていないエントリをマージして復元する
@@ -28,17 +65,21 @@ export const useEntries = () => {
       }
       entries.value = data;
       isLoaded.value = true;
+      writeCache(data);
     } catch (err) {
       error.value = err.message;
       throw err;
     } finally {
+      // 取得失敗時に空の entries でキャッシュを潰さないよう、ここでは書き込まない
       isLoading.value = false;
     }
   };
 
   const clearEntries = () => {
+    clearTimeout(cacheTimer); // 予約済みの書き込みが消したキャッシュを復活させないように
     entries.value = [];
     isLoaded.value = false;
+    localStorage.removeItem(CACHE_KEY);
   };
 
   const addEntry = async (entryData) => {
@@ -56,6 +97,7 @@ export const useEntries = () => {
       throw err;
     } finally {
       isLoading.value = false;
+      scheduleCacheWrite();
     }
   };
 
@@ -77,6 +119,7 @@ export const useEntries = () => {
       throw err;
     } finally {
       isLoading.value = false;
+      scheduleCacheWrite();
     }
   };
 
@@ -91,31 +134,35 @@ export const useEntries = () => {
       throw err;
     } finally {
       isLoading.value = false;
+      scheduleCacheWrite();
     }
   };
 
   const removeBulk = async (ids) => {
     isLoading.value = true;
     error.value = null;
-    const succeeded = [];
     let failed = 0;
     try {
-      for (let i = 0; i < ids.length; i++) {
+      // 1件ずつ + 待機だと100件で20秒以上かかる。429 は fetchWithRetry 側で吸収されるので少数並列で流す
+      const results = await mapWithConcurrency(ids, async (id) => {
         try {
-          await deleteApi(ids[i]);
-          succeeded.push(ids[i]);
+          await deleteApi(id);
+          return id;
         } catch {
           failed++;
+          return null;
         }
-        if (i < ids.length - 1) await new Promise(r => setTimeout(r, 200));
-      }
-      entries.value = entries.value.filter(e => !succeeded.includes(e.id));
+      });
+
+      const succeeded = new Set(results.filter(Boolean));
+      entries.value = entries.value.filter(e => !succeeded.has(e.id));
       if (failed > 0) throw new Error(`${failed}件の削除に失敗しました`);
     } catch (err) {
       error.value = err.message;
       throw err;
     } finally {
       isLoading.value = false;
+      scheduleCacheWrite();
     }
   };
 

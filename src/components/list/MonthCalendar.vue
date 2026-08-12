@@ -76,7 +76,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { formatProfit, formatCurrency } from '../../utils/formatters';
+import { formatProfit, formatCurrency } from '@/utils/formatters';
 
 const router = useRouter();
 

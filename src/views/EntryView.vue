@@ -14,8 +14,8 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import EntryForm from '../components/entry/EntryForm.vue';
-import { useEntries } from '../composables/useEntries';
+import EntryForm from '@/components/entry/EntryForm.vue';
+import { useEntries } from '@/composables/useEntries';
 
 const route = useRoute();
 const isEdit = computed(() => !!route.params.id);

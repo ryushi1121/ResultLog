@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency } from '@/utils/formatters';
 
 const props = defineProps({
   title: {

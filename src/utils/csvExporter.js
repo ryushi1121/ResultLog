@@ -32,6 +32,13 @@ export const exportCSV = (entries, filename = 'resultlog.csv') => {
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  // click 直後に revoke するとダウンロードが始まる前に URL が無効になる環境がある。
+  // アンカーも DOM に挿してからクリックしないと一部ブラウザで無視される
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
 };

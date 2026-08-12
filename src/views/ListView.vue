@@ -12,7 +12,8 @@
       @filter-change="handleFilterChange"
     />
 
-    <div v-if="isLoading" class="loading-state">
+    <!-- キャッシュがあるときは一覧を見せたまま裏で更新する -->
+    <div v-if="isLoading && entries.length === 0" class="loading-state">
       <div class="spinner"></div>
       <p>データを読み込み中...</p>
     </div>
@@ -65,14 +66,16 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useEntries } from '../composables/useEntries';
-import FilterPanel from '../components/list/FilterPanel.vue';
-import EntryTable from '../components/list/EntryTable.vue';
-import MonthCalendar from '../components/list/MonthCalendar.vue';
-import { exportCSV } from '../utils/csvExporter';
+import { useEntries } from '@/composables/useEntries';
+import FilterPanel from '@/components/list/FilterPanel.vue';
+import EntryTable from '@/components/list/EntryTable.vue';
+import MonthCalendar from '@/components/list/MonthCalendar.vue';
+import { exportCSV } from '@/utils/csvExporter';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const { entries, isLoading, error, loadEntries, removeEntry, removeBulk, suggestStores, suggestMachines, isLoaded } = useEntries();
+const { showError } = useToast();
 const currentFilters = ref(null);
 const viewMode = ref('calendar'); // 'calendar' | 'list'
 const calendarMonth = ref(null);  // カレンダー表示用の月 (YYYY-MM)
@@ -153,7 +156,7 @@ const handleDelete = async (id) => {
   try {
     await removeEntry(id);
   } catch (err) {
-    alert('削除に失敗しました: ' + err.message);
+    showError('削除に失敗しました: ' + err.message);
   }
 };
 
@@ -161,7 +164,7 @@ const handleBulkDelete = async (ids) => {
   try {
     await removeBulk(ids);
   } catch (err) {
-    alert(err.message);
+    showError(err.message);
   }
 };
 

@@ -28,32 +28,29 @@
   ></div>
 </template>
 
-<script>
-export default {
-  name: 'AppSidebar',
-  props: {
-    open: { type: Boolean, default: false }
-  },
-  emits: ['close'],
-  setup(props, { emit }) {
-    const navItems = [
-      { to: '/', label: 'ダッシュボード', icon: 'fa-solid fa-chart-pie', id: 'dashboard' },
-      { to: '/entry', label: '収支登録', icon: 'fa-solid fa-pen-to-square', id: 'entry' },
-      { to: '/list', label: '収支一覧', icon: 'fa-solid fa-list', id: 'list' },
-      { to: '/analytics', label: '集計', icon: 'fa-solid fa-table-list', id: 'analytics' },
-      { to: '/charts', label: '分析', icon: 'fa-solid fa-chart-area', id: 'charts' },
-      { to: '/settings', label: '設定', icon: 'fa-solid fa-gear', id: 'settings' }
-    ]
+<script setup>
+defineProps({
+  open: { type: Boolean, default: false }
+})
 
-    const handleNavClick = () => {
-      if (window.innerWidth < 1024) {
-        emit('close')
-      }
-    }
+const emit = defineEmits(['close'])
 
-    return { navItems, handleNavClick, appVersion: __APP_VERSION__ }
+const navItems = [
+  { to: '/', label: 'ダッシュボード', icon: 'fa-solid fa-chart-pie', id: 'dashboard' },
+  { to: '/entry', label: '収支登録', icon: 'fa-solid fa-pen-to-square', id: 'entry' },
+  { to: '/list', label: '収支一覧', icon: 'fa-solid fa-list', id: 'list' },
+  { to: '/analytics', label: '集計', icon: 'fa-solid fa-table-list', id: 'analytics' },
+  { to: '/charts', label: '分析', icon: 'fa-solid fa-chart-area', id: 'charts' },
+  { to: '/settings', label: '設定', icon: 'fa-solid fa-gear', id: 'settings' }
+]
+
+const handleNavClick = () => {
+  if (window.innerWidth < 1024) {
+    emit('close')
   }
 }
+
+const appVersion = __APP_VERSION__
 </script>
 
 <style scoped>

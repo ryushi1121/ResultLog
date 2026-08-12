@@ -114,8 +114,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { formatDateDisplay } from '../../utils/dateUtils';
-import { formatCurrency, formatProfit } from '../../utils/formatters';
+import { formatDateDisplay } from '@/utils/dateUtils';
+import { formatCurrency, formatProfit } from '@/utils/formatters';
 
 const router = useRouter();
 

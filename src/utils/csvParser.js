@@ -15,23 +15,62 @@ export const readFileAsText = async (file) => {
   }
 };
 
-const parseCSVLine = (line) => {
-  const fields = [];
-  let current = '';
+/**
+ * CSV 全文をレコード単位に分解する。
+ *
+ * 行で先に split すると、メモの改行をクォートで囲んで出力した自前の
+ * エクスポート CSV を読み戻せないため、引用符の内外を見ながら
+ * 1文字ずつ走査してレコードを切り出す。
+ *
+ * @param {String} text 改行が \n に正規化済みの CSV 全文
+ * @returns {Array<{cells: String[], raw: String, lineNum: Number}>} lineNum はレコード開始の物理行番号（1始まり）
+ */
+const parseCSVRecords = (text) => {
+  const records = [];
+  let cells = [];
+  let field = '';
   let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
-      fields.push(current); current = '';
+  let recordStart = 0;
+  let line = 1;
+  let recordStartLine = 1;
+
+  const endRecord = (endIdx, nextStartIdx) => {
+    cells.push(field);
+    // 空行（全セルが空）は区切り行とみなして捨てる
+    if (cells.some(c => c.trim() !== '')) {
+      records.push({ cells, raw: text.slice(recordStart, endIdx), lineNum: recordStartLine });
+    }
+    cells = [];
+    field = '';
+    recordStart = nextStartIdx;
+    recordStartLine = line;
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        if (ch === '\n') line++;
+        field += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      cells.push(field);
+      field = '';
+    } else if (ch === '\n') {
+      line++;
+      endRecord(i, i + 1);
     } else {
-      current += ch;
+      field += ch;
     }
   }
-  fields.push(current);
-  return fields;
+  endRecord(text.length, text.length);
+
+  return records;
 };
 
 const normDate = (raw) => {
@@ -71,12 +110,12 @@ const ALIASES = {
 };
 
 export const parseCSV = (text, calcYen = (_, n) => n) => {
-  const content = text.replace(/^﻿/, '');
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim());
+  const content = text.replace(/^﻿/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const records = parseCSVRecords(content);
 
-  if (lines.length < 2) return { valid: [], invalid: [], totalRows: 0 };
+  if (records.length < 2) return { valid: [], invalid: [], totalRows: 0 };
 
-  const headers = parseCSVLine(lines[0]).map(h => h.trim());
+  const headers = records[0].cells.map(h => h.trim());
 
   const colIdx = {};
   for (const [field, aliases] of Object.entries(ALIASES)) {
@@ -89,9 +128,9 @@ export const parseCSV = (text, calcYen = (_, n) => n) => {
   const valid = [];
   const invalid = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseCSVLine(lines[i]);
-    const rowNum = i + 1;
+  for (let i = 1; i < records.length; i++) {
+    const { cells, raw, lineNum } = records[i];
+    const rowNum = lineNum;
     const errors = [];
     const get = (f) => colIdx[f] !== undefined ? (cells[colIdx[f]] || '').trim() : '';
 
@@ -127,7 +166,7 @@ export const parseCSV = (text, calcYen = (_, n) => n) => {
       errors.push('回収が数値でない');
     }
 
-    if (errors.length > 0) { invalid.push({ rowNum, errors, raw: lines[i] }); continue; }
+    if (errors.length > 0) { invalid.push({ rowNum, errors, raw }); continue; }
 
     // Fill defaults（メダルは枚→円換算してから合計に反映）
     const invMedalYen = calcYen(store, investmentMedal || 0);
@@ -154,5 +193,5 @@ export const parseCSV = (text, calcYen = (_, n) => n) => {
     });
   }
 
-  return { valid, invalid, totalRows: lines.length - 1 };
+  return { valid, invalid, totalRows: records.length - 1 };
 };

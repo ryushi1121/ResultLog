@@ -2,6 +2,7 @@
   <!-- ログイン画面はレイアウトなし -->
   <div v-if="$route.meta.layout === 'none'" class="app-no-layout">
     <router-view />
+    <AppToast />
   </div>
 
   <!-- メインレイアウト -->
@@ -25,53 +26,43 @@
         </router-view>
       </div>
     </main>
+    <AppToast />
   </div>
 </template>
 
-<script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from './composables/useAuth'
-import { useEntries } from './composables/useEntries'
-import AppHeader from './components/common/AppHeader.vue'
-import AppSidebar from './components/common/AppSidebar.vue'
+import { useAuth } from '@/composables/useAuth'
+import { useEntries } from '@/composables/useEntries'
+import AppHeader from '@/components/common/AppHeader.vue'
+import AppSidebar from '@/components/common/AppSidebar.vue'
+import AppToast from '@/components/common/AppToast.vue'
 
-export default {
-  name: 'App',
-  components: { AppHeader, AppSidebar },
-  setup() {
-    const router = useRouter()
-    const { user, logout } = useAuth()
-    const { clearEntries } = useEntries()
-    const sidebarOpen = ref(window.innerWidth >= 1024)
+const router = useRouter()
+const { user, logout } = useAuth()
+const { clearEntries } = useEntries()
+const sidebarOpen = ref(window.innerWidth >= 1024)
 
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        sidebarOpen.value = false
-      }
-    }
-
-    const handleLogout = () => {
-      logout()
-      clearEntries()
-      router.push({ name: 'Login' })
-    }
-
-    onMounted(() => {
-      window.addEventListener('resize', handleResize)
-    })
-
-    onUnmounted(() => {
-      window.removeEventListener('resize', handleResize)
-    })
-
-    return {
-      user,
-      sidebarOpen,
-      handleLogout
-    }
+const handleResize = () => {
+  if (window.innerWidth < 1024) {
+    sidebarOpen.value = false
   }
 }
+
+const handleLogout = () => {
+  logout()
+  clearEntries()
+  router.push({ name: 'Login' })
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 
 <style scoped>

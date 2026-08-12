@@ -12,12 +12,13 @@ const applyTheme = (t) => {
   localStorage.setItem(STORAGE_KEY, t);
 };
 
-// 初期化
+// 初期化と監視はモジュール読み込み時の1回だけ。
+// useTheme() の中で watch すると呼ばれた回数だけ監視が積み上がり、
+// setup 外から呼ばれた場合はコンポーネントが破棄されても解除されない
 applyTheme(theme.value);
+watch(theme, applyTheme);
 
 export function useTheme() {
-  watch(theme, applyTheme);
-
   const toggleTheme = () => {
     theme.value = theme.value === 'dark' ? 'light' : 'dark';
   };

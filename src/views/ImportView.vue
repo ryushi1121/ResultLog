@@ -64,7 +64,19 @@
           <i class="fa-solid fa-circle-exclamation"></i>
           エラー <strong>{{ parseResult.invalid.length }}件</strong>（スキップ）
         </div>
+        <div v-if="duplicateRowNums.size > 0" class="summary-chip summary-chip--dup">
+          <i class="fa-solid fa-copy"></i>
+          登録済み <strong>{{ duplicateRowNums.size }}件</strong>
+        </div>
       </div>
+
+      <div v-if="isLoading && !isLoaded" class="dup-note mt-3">
+        <i class="fa-solid fa-spinner fa-spin"></i> 登録済みデータと照合中…
+      </div>
+      <label v-else-if="duplicateRowNums.size > 0" class="dup-check mt-3">
+        <input v-model="skipDuplicates" type="checkbox" />
+        <span>すでに登録済みの {{ duplicateRowNums.size }}件を取り込まない</span>
+      </label>
 
       <div v-if="parseResult.invalid.length > 0" class="error-list mt-3">
         <p class="error-list-title">エラー行の詳細</p>
@@ -78,6 +90,10 @@
         取込可能なデータが1件もありません。CSVの内容を確認してください。
       </div>
 
+      <div v-else-if="rowsToImport.length === 0" class="alert-error mt-3">
+        取り込む行がありません。{{ parseResult.valid.length }}件すべてが登録済みです。
+      </div>
+
       <div v-else class="preview-table-wrap mt-3">
         <p class="preview-table-title">取込データ（先頭5件）</p>
         <table class="data-table preview-table">
@@ -87,7 +103,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in parseResult.valid.slice(0, 5)" :key="row.rowNum">
+            <tr v-for="row in rowsToImport.slice(0, 5)" :key="row.rowNum">
               <td>{{ row.date }}</td>
               <td>{{ row.store }}</td>
               <td>{{ row.machine || '—' }}</td>
@@ -99,8 +115,8 @@
             </tr>
           </tbody>
         </table>
-        <p v-if="parseResult.valid.length > 5" class="text-muted" style="font-size:0.8rem;margin-top:6px;">
-          … 他 {{ parseResult.valid.length - 5 }}件
+        <p v-if="rowsToImport.length > 5" class="text-muted" style="font-size:0.8rem;margin-top:6px;">
+          … 他 {{ rowsToImport.length - 5 }}件
         </p>
       </div>
 
@@ -108,9 +124,9 @@
         <button class="btn btn-secondary" @click="reset">← 戻る</button>
         <button
           class="btn btn-primary"
-          :disabled="parseResult.valid.length === 0"
+          :disabled="rowsToImport.length === 0"
           @click="startImport"
-        >取込開始（{{ parseResult.valid.length }}件）</button>
+        >取込開始（{{ rowsToImport.length }}件）</button>
       </div>
     </div>
 
@@ -151,13 +167,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { readFileAsText, parseCSV } from '@/utils/csvParser';
+import { entrySignature } from '@/utils/entryUtils';
+import { mapWithConcurrency } from '@/utils/concurrency';
 import { useEntries } from '@/composables/useEntries';
 import { useStoreSettings } from '@/composables/useStoreSettings';
 
-const { addEntry } = useEntries();
+const { addEntry, entries, isLoaded, isLoading, loadEntries } = useEntries();
 const { calculateYen } = useStoreSettings();
+
+// 重複判定には登録済みデータが必要なので、他の画面を経由せず直接開かれた場合はここで取得する
+onMounted(() => {
+  if (!isLoaded.value) loadEntries().catch(() => {});
+});
 
 const step        = ref(1);
 const isDragOver  = ref(false);
@@ -167,8 +190,27 @@ const parseError   = ref('');
 const progress     = ref({ current: 0, total: 0, done: false, success: 0, failed: 0, currentLabel: '' });
 const failedRows   = ref([]);
 
+const skipDuplicates = ref(true);
+
 const progressPct = computed(() =>
   progress.value.total > 0 ? Math.round((progress.value.current / progress.value.total) * 100) : 0
+);
+
+// 登録済みと同じ内容の行（同じCSVを二度取り込んだときの二重登録を防ぐ）
+const duplicateRowNums = computed(() => {
+  if (!isLoaded.value) return new Set();
+  const existing = new Set(entries.value.map(entrySignature));
+  return new Set(
+    parseResult.value.valid
+      .filter(row => existing.has(entrySignature(row)))
+      .map(row => row.rowNum)
+  );
+});
+
+const rowsToImport = computed(() =>
+  skipDuplicates.value
+    ? parseResult.value.valid.filter(row => !duplicateRowNums.value.has(row.rowNum))
+    : parseResult.value.valid
 );
 
 const csvColumns = [
@@ -211,14 +253,13 @@ const onFileChange = (e) => processFile(e.target.files[0]);
 const onDrop = (e) => processFile(e.dataTransfer.files[0]);
 
 const startImport = async () => {
+  const rows = rowsToImport.value;
   step.value = 3;
-  const rows = parseResult.value.valid;
   progress.value = { current: 0, total: rows.length, done: false, success: 0, failed: 0, currentLabel: '' };
   failedRows.value = [];
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    progress.value.current = i + 1;
+  // 429 は useCalendar 側でバックオフ再試行されるため、少数並列で流して待ち時間を詰める
+  await mapWithConcurrency(rows, async (row) => {
     progress.value.currentLabel = `${row.date} ${row.store}`;
     try {
       await addEntry(row);
@@ -227,12 +268,10 @@ const startImport = async () => {
       progress.value.failed++;
       failedRows.value.push({ row, error: e.message });
     }
-    // Google Calendar API レート制限対策（200ms待機）
-    if (i < rows.length - 1) {
-      await new Promise(r => setTimeout(r, 200));
-    }
-  }
+    progress.value.current++;
+  });
 
+  progress.value.currentLabel = '';
   progress.value.done = true;
 };
 
@@ -284,6 +323,12 @@ const reset = () => {
 .summary-chip { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; }
 .summary-chip--ok    { background: rgba(34,197,94,0.1);   color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
 .summary-chip--error { background: rgba(239,68,68,0.1);   color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.summary-chip--dup   { background: rgba(245,158,11,0.1);  color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+
+/* 重複スキップの選択 */
+.dup-check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--text-sub); cursor: pointer; }
+.dup-check input { accent-color: var(--primary-color); cursor: pointer; }
+.dup-note { font-size: 0.82rem; color: var(--text-faded); }
 
 /* Error list */
 .error-list { border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px 16px; }

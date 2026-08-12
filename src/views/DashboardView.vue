@@ -39,8 +39,8 @@
       </div>
     </div>
 
-    <!-- ローディング状態 -->
-    <div v-if="isLoading" class="loading-state">
+    <!-- ローディング状態（キャッシュがあるときは中身を見せたまま裏で更新する） -->
+    <div v-if="isLoading && entries.length === 0" class="loading-state">
       <div class="spinner"></div>
       <p>データを読み込み中...</p>
     </div>
@@ -104,12 +104,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useEntries } from '../composables/useEntries';
-import { formatCurrency } from '../utils/formatters';
-import { cashTotals } from '../utils/entryUtils';
-import SummaryCard from '../components/dashboard/SummaryCard.vue';
-import QuickStats from '../components/dashboard/QuickStats.vue';
-import RecentHistory from '../components/dashboard/RecentHistory.vue';
+import { useEntries } from '@/composables/useEntries';
+import { formatCurrency } from '@/utils/formatters';
+import { cashTotals } from '@/utils/entryUtils';
+import SummaryCard from '@/components/dashboard/SummaryCard.vue';
+import QuickStats from '@/components/dashboard/QuickStats.vue';
+import RecentHistory from '@/components/dashboard/RecentHistory.vue';
 
 const { entries, isLoading, error, loadEntries, isLoaded } = useEntries();
 
@@ -153,17 +153,6 @@ const displayPeriodStr = computed(() => {
 
 const targetPeriodText = computed(() => {
   return displayPeriodStr.value;
-});
-
-// 未来の期間かどうか（次へボタンの無効化用）
-const isFuturePeriod = computed(() => {
-  const now = new Date();
-  if (viewMode.value === 'month') {
-    return currentDate.value.getFullYear() === now.getFullYear() && 
-           currentDate.value.getMonth() >= now.getMonth();
-  } else {
-    return currentDate.value.getFullYear() >= now.getFullYear();
-  }
 });
 
 // 表示期間のデータをフィルタリング

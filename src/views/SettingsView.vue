@@ -126,8 +126,10 @@ import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { useEntries } from '@/composables/useEntries';
 import { useStoreSettings } from '@/composables/useStoreSettings';
+import { useToast } from '@/composables/useToast';
 
 const router = useRouter();
+const { showError } = useToast();
 const { user, logout } = useAuth();
 const { loadEntries, clearEntries, isLoading, suggestStores } = useEntries();
 const { storeSettings, setExchangeRate, removeStoreSettings } = useStoreSettings();
@@ -166,8 +168,8 @@ const handleSync = async () => {
     await loadEntries();
     syncMessage.value = '同期が完了しました。';
     setTimeout(() => { syncMessage.value = ''; }, 3000);
-  } catch (err) {
-    alert('同期に失敗しました。');
+  } catch {
+    showError('同期に失敗しました。');
   }
 };
 </script>

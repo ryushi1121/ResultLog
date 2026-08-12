@@ -39,8 +39,8 @@
 
 <script setup>
 import { computed } from 'vue';
-import { formatDateDisplay } from '../../utils/dateUtils';
-import { formatProfit } from '../../utils/formatters';
+import { formatDateDisplay } from '@/utils/dateUtils';
+import { formatProfit } from '@/utils/formatters';
 
 const props = defineProps({
   entries: {

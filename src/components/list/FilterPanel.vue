@@ -48,10 +48,10 @@
 
 <script setup>
 import { reactive, computed, watch, onMounted } from 'vue';
-import { getMonthString } from '../../utils/dateUtils';
-import { useEntries } from '../../composables/useEntries';
+import { getMonthString } from '@/utils/dateUtils';
+import { useEntries } from '@/composables/useEntries';
 
-const props = defineProps({
+defineProps({
   stores: {
     type: Array,
     default: () => []

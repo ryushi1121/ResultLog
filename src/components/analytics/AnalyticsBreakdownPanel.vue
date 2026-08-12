@@ -1,38 +1,36 @@
 <template>
-  <transition name="slide-down">
-    <div class="breakdown-panel">
-      <div class="breakdown-panel-header">
-        <span class="breakdown-panel-title">{{ title }}の内訳（{{ entries.length }}件）</span>
-        <span class="breakdown-panel-total" :class="profitClass(totalProfit)">
-          {{ formatProfit(totalProfit) }}
-        </span>
-        <button class="breakdown-panel-close" @click="$emit('close')">✕</button>
-      </div>
-
-      <div v-if="sortedEntries.length === 0" class="breakdown-panel-empty">
-        データがありません
-      </div>
-      <div
-        v-for="entry in sortedEntries"
-        :key="entry.id"
-        class="breakdown-entry"
-        @click="editEntry(entry)"
-      >
-        <div class="bde-main">
-          <div class="bde-top">
-            <span class="bde-date">{{ formatDate(entry) }}</span>
-            <span class="bde-store">{{ entry.store }}</span>
-          </div>
-          <span class="bde-machine">{{ entry.machine }}{{ entry.slotNumber ? ` #${entry.slotNumber}` : '' }}</span>
-        </div>
-        <div class="bde-right">
-          <span class="bde-profit" :class="profitClass(entry.profit)">{{ formatProfit(entry.profit) }}</span>
-          <span class="bde-inv">{{ formatCurrency(entry.investment) }}/{{ formatCurrency(entry.collection) }}</span>
-        </div>
-        <i class="fa-solid fa-chevron-right bde-arrow"></i>
-      </div>
+  <div class="breakdown-panel">
+    <div class="breakdown-panel-header">
+      <span class="breakdown-panel-title">{{ title }}の内訳（{{ entries.length }}件）</span>
+      <span class="breakdown-panel-total" :class="profitClass(totalProfit)">
+        {{ formatProfit(totalProfit) }}
+      </span>
+      <button class="breakdown-panel-close" @click="$emit('close')">✕</button>
     </div>
-  </transition>
+
+    <div v-if="sortedEntries.length === 0" class="breakdown-panel-empty">
+      データがありません
+    </div>
+    <div
+      v-for="entry in sortedEntries"
+      :key="entry.id"
+      class="breakdown-entry"
+      @click="editEntry(entry)"
+    >
+      <div class="bde-main">
+        <div class="bde-top">
+          <span class="bde-date">{{ formatDate(entry) }}</span>
+          <span class="bde-store">{{ entry.store }}</span>
+        </div>
+        <span class="bde-machine">{{ entry.machine }}{{ entry.slotNumber ? ` #${entry.slotNumber}` : '' }}</span>
+      </div>
+      <div class="bde-right">
+        <span class="bde-profit" :class="profitClass(entry.profit)">{{ formatProfit(entry.profit) }}</span>
+        <span class="bde-inv">{{ formatCurrency(entry.investment) }}/{{ formatCurrency(entry.collection) }}</span>
+      </div>
+      <i class="fa-solid fa-chevron-right bde-arrow"></i>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -75,6 +73,8 @@ const editEntry = (entry) => {
   border-radius: 0 0 10px 10px;
   margin-top: 12px;
   overflow: hidden;
+  transform-origin: top;
+  animation: slide-down 0.2s ease;
 }
 .breakdown-panel-header {
   display: flex;
@@ -149,11 +149,10 @@ const editEntry = (entry) => {
 .negative { color: var(--danger-color); }
 .zero     { color: var(--text-sub); }
 
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform-origin: top;
+/* 親が v-if でこのコンポーネントごと出し入れするため、内側に <transition> を置いても
+   マウント時には発火しなかった。表示アニメは CSS animation で直接持たせる */
+@keyframes slide-down {
+  from { opacity: 0; transform: scaleY(0.95); }
+  to   { opacity: 1; transform: scaleY(1); }
 }
-.slide-down-enter-from,
-.slide-down-leave-to { opacity: 0; transform: scaleY(0.95); }
 </style>

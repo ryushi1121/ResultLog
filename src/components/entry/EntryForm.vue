@@ -191,10 +191,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useEntries } from '../../composables/useEntries';
-import { useStoreSettings } from '../../composables/useStoreSettings';
-import { formatDateForAPI } from '../../utils/dateUtils';
-import { formatProfit } from '../../utils/formatters';
+import { useEntries } from '@/composables/useEntries';
+import { useStoreSettings } from '@/composables/useStoreSettings';
+import { useToast } from '@/composables/useToast';
+import { formatDateForAPI } from '@/utils/dateUtils';
+import { formatProfit } from '@/utils/formatters';
 import SuggestInput from './SuggestInput.vue';
 
 const props = defineProps({
@@ -207,6 +208,7 @@ const props = defineProps({
 const router = useRouter();
 const { entries, isLoaded, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
 const { calculateYen } = useStoreSettings();
+const { showError } = useToast();
 
 const emptyForm = () => ({
   date: formatDateForAPI(new Date()),
@@ -293,7 +295,7 @@ const handleDelete = async () => {
     await removeEntry(props.entryId);
     router.push({ name: 'List' });
   } catch (err) {
-    alert('削除に失敗しました: ' + err.message);
+    showError('削除に失敗しました: ' + err.message);
   }
 };
 

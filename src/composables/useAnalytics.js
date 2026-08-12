@@ -1,11 +1,13 @@
 import { ref, computed } from 'vue';
 import { useEntries } from './useEntries';
-import { cashOf } from '../utils/entryUtils';
-import { aggregateWeekdayStats } from '../utils/analyticsUtils';
+import { cashOf } from '@/utils/entryUtils';
+import { aggregateWeekdayStats } from '@/utils/analyticsUtils';
+import { getMonthString } from '@/utils/dateUtils';
 
 // Shared state so it persists across components
 const periodType = ref('month');
-const periodValue = ref(new Date().toISOString().substring(0, 7));
+// toISOString は UTC 基準なので、JST の月初 0:00〜9:00 に開くと前月になってしまう
+const periodValue = ref(getMonthString(new Date()));
 const selectedStore = ref('');
 const selectedMachine = ref(null);
 
@@ -351,8 +353,10 @@ export const useAnalytics = () => {
     return result;
   });
 
+  // 未選択は空文字で表す（PeriodSelector の「全店舗」option と揃える）。
+  // null を入れると `!== ''` の判定を素通りして store === null で全件が落ちる
   const setSelectedStore = (name) => {
-    selectedStore.value = selectedStore.value === name ? null : name;
+    selectedStore.value = selectedStore.value === name ? '' : name;
   };
   const setSelectedMachine = (name) => {
     selectedMachine.value = selectedMachine.value === name ? null : name;

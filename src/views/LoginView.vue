@@ -69,54 +69,43 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '@/composables/useAuth'
 
-export default {
-  name: 'LoginView',
-  setup() {
-    const router = useRouter()
-    const { isLoggedIn, login, authError } = useAuth()
-    const isLoading = ref(false)
-    const errorMessage = ref('')
+const router = useRouter()
+const { isLoggedIn, login, authError } = useAuth()
+const isLoading = ref(false)
+const errorMessage = ref('')
 
-    // ログイン状態を監視 → ダッシュボードへ遷移
-    watch(isLoggedIn, (loggedIn) => {
-      if (loggedIn) {
-        router.push({ name: 'Dashboard' })
-      }
-    })
+// ログイン状態を監視 → ダッシュボードへ遷移
+watch(isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    router.push({ name: 'Dashboard' })
+  }
+})
 
-    // 認証エラーを監視 → UIに反映
-    watch(authError, (newError) => {
-      if (newError) {
-        errorMessage.value = newError
-      }
-    })
+// 認証エラーを監視 → UIに反映
+watch(authError, (newError) => {
+  if (newError) {
+    errorMessage.value = newError
+  }
+})
 
-    async function handleLogin() {
-      isLoading.value = true
-      errorMessage.value = ''
-      
-      try {
-        await login()
-      } catch (error) {
-        errorMessage.value = error.message || 'ログインに失敗しました。もう一度お試しください。'
-      } finally {
-        // GISのポップアップが閉じた後にリセット（少し待つ）
-        setTimeout(() => {
-          isLoading.value = false
-        }, 1000)
-      }
-    }
+async function handleLogin() {
+  isLoading.value = true
+  errorMessage.value = ''
 
-    return {
-      isLoading,
-      errorMessage,
-      handleLogin
-    }
+  try {
+    await login()
+  } catch (error) {
+    errorMessage.value = error.message || 'ログインに失敗しました。もう一度お試しください。'
+  } finally {
+    // GISのポップアップが閉じた後にリセット（少し待つ）
+    setTimeout(() => {
+      isLoading.value = false
+    }, 1000)
   }
 }
 </script>
