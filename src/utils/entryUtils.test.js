@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { cashOf, cashTotals, entrySignature } from './entryUtils.js';
+import { cashOf, cashTotals, entrySignature, rankByUsage } from './entryUtils.js';
 
 test('貯メダル欄がない古いエントリは総額を現金とみなす', () => {
   assert.equal(cashOf({ investment: 12000 }, 'investment'), 12000);
@@ -38,4 +38,24 @@ test('台番号や金額が違えば別の記録として扱う', () => {
   assert.notEqual(entrySignature(base), entrySignature({ ...base, slotNumber: '124' }));
   assert.notEqual(entrySignature(base), entrySignature({ ...base, investment: 12000 }));
   assert.notEqual(entrySignature(base), entrySignature({ ...base, date: '2026-08-02' }));
+});
+
+test('候補は最近使った順、同日なら使用回数順に並ぶ', () => {
+  const entries = [
+    { date: '2026-09-01', store: 'A店', machine: '北斗' },
+    { date: '2026-09-10', store: 'B店', machine: 'ジャグラー' },
+    { date: '2026-09-10', store: 'C店', machine: 'ジャグラー' },
+    { date: '2026-08-01', store: 'C店', machine: '番長' },
+    { date: '2026-09-05', store: ' ', machine: '' }
+  ];
+  assert.deepEqual(rankByUsage(entries, 'store'), ['C店', 'B店', 'A店']);
+  assert.deepEqual(rankByUsage(entries, 'machine'), ['ジャグラー', '北斗', '番長']);
+});
+
+test('filter で対象エントリを絞り込める', () => {
+  const entries = [
+    { date: '2026-09-01', store: 'A店', machine: '北斗' },
+    { date: '2026-09-10', store: 'B店', machine: 'ジャグラー' }
+  ];
+  assert.deepEqual(rankByUsage(entries, 'machine', e => e.store === 'A店'), ['北斗']);
 });

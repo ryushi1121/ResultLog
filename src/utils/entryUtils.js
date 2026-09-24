@@ -53,3 +53,30 @@ export const cashTotals = (entries) => {
   });
   return { investment, collection, profit: collection - investment };
 };
+
+/**
+ * 入力候補を「最近使った順 → 使用回数順」に並べて返す。
+ *
+ * 名前順だと候補が増えるほど目当てを探しづらくなるので、
+ * 直近に打った店・機種ほど上に来るようにしている。
+ *
+ * @param {Array<Object>} entries
+ * @param {'store'|'machine'} key
+ * @param {(entry: Object) => Boolean} [filter] 対象エントリの絞り込み
+ * @returns {Array<String>}
+ */
+export const rankByUsage = (entries, key, filter = () => true) => {
+  const stats = new Map();
+  for (const entry of entries) {
+    const name = (entry[key] || '').trim();
+    if (!name || !filter(entry)) continue;
+    const s = stats.get(name) || { count: 0, last: '' };
+    s.count += 1;
+    if ((entry.date || '') > s.last) s.last = entry.date || '';
+    stats.set(name, s);
+  }
+  return Array.from(stats.entries())
+    .sort(([a, x], [b, y]) =>
+      y.last.localeCompare(x.last) || y.count - x.count || a.localeCompare(b, 'ja'))
+    .map(([name]) => name);
+};

@@ -30,7 +30,7 @@
         v-model="formData.store"
         label="店舗名"
         placeholder="例: マルハン新宿東口店"
-        :suggestions="suggestStores"
+        :suggestions="rankedStores"
         required
       />
 
@@ -39,7 +39,7 @@
         v-model="formData.machine"
         label="機種名"
         placeholder="例: バジリスク絆2天膳"
-        :suggestions="suggestMachines"
+        :suggestions="rankedMachines"
       />
 
       <div class="form-group">
@@ -197,6 +197,7 @@ import { useToast } from '@/composables/useToast';
 import { formatDateForAPI } from '@/utils/dateUtils';
 import { formatProfit } from '@/utils/formatters';
 import SuggestInput from './SuggestInput.vue';
+import { rankByUsage } from '@/utils/entryUtils';
 
 const props = defineProps({
   entryId: {
@@ -206,7 +207,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const { entries, isLoaded, addEntry, editEntry, removeEntry, suggestStores, suggestMachines, isLoading, error } = useEntries();
+const { entries, isLoaded, addEntry, editEntry, removeEntry, isLoading, error } = useEntries();
 const { calculateYen } = useStoreSettings();
 const { showError } = useToast();
 
@@ -225,6 +226,16 @@ const emptyForm = () => ({
 });
 
 const formData = ref(emptyForm());
+
+// 候補は最近使った順。機種は選択中の店舗で打ったものを優先する
+const rankedStores = computed(() => rankByUsage(entries.value, 'store'));
+const rankedMachines = computed(() => {
+  const store = (formData.value.store || '').trim();
+  const all = rankByUsage(entries.value, 'machine');
+  if (!store) return all;
+  const atStore = rankByUsage(entries.value, 'machine', e => (e.store || '').trim() === store);
+  return [...atStore, ...all.filter(m => !atStore.includes(m))];
+});
 
 // Computed totals using store exchange rate
 const totalInvestment = computed(() => {
